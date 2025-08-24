@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const passport = require('passport');
-const { registerUser, loginUser, getMe } = require('../controllers/authController');
+const { registerUser, loginUser, getMe, updateProfile } = require('../controllers/authController');
 const authMiddleware = require('../middleware/authMiddleware');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
@@ -10,6 +10,7 @@ require('dotenv').config();
 router.post('/register', registerUser);
 router.post('/login', loginUser);
 router.get('/me', authMiddleware, getMe);
+router.put('/profile', authMiddleware, updateProfile);
 
 // Google OAuth Authentication (only if configured)
 if (process.env.GOOGLE_CLIENT_ID && 

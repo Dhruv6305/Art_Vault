@@ -8,7 +8,10 @@ const UserSchema = new mongoose.Schema({
   age: { type: Number },
   address: { type: String },
   country: { type: String },
-  contactInfo: { type: String },
+  state: { type: String },
+  phoneCountryCode: { type: String, default: '+1' },
+  phoneNumber: { type: String },
+  contactInfo: { type: String }, // Keep for backward compatibility
   date: { type: Date, default: Date.now },
 });
 
