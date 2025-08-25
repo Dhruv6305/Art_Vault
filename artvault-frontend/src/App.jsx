@@ -11,8 +11,12 @@ import Marketplace from "./pages/Marketplace.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import Profile from "./pages/Profile.jsx";
 import AuthSuccess from "./pages/AuthSuccess.jsx";
+import ToastContainer from "./components/ui/ToastContainer.jsx";
+import { useToast } from "./hooks/useToast.js";
 
 function App() {
+  const { toasts, removeToast } = useToast();
+
   // Screenshot protection is disabled for now
   // To enable, uncomment the useEffect below and the import above
 
@@ -67,6 +71,7 @@ function App() {
             <Route path="/auth/success" element={<AuthSuccess />} />
           </Routes>
         </main>
+        <ToastContainer toasts={toasts} removeToast={removeToast} />
       </Router>
     </AuthProvider>
   );
