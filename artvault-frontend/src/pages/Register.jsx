@@ -3,6 +3,9 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import api from "../api/axios.js";
 import PasswordStrength from "../components/ui/PasswordStrength.jsx";
+import LocationPicker from "../components/ui/LocationPicker.jsx";
+import CountrySelector from "../components/ui/CountrySelector.jsx";
+import PhoneInput from "../components/ui/PhoneInput.jsx";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -14,8 +17,13 @@ const Register = () => {
     confirmPassword: "",
     age: "",
     address: "",
+    city: "",
+    state: "",
     country: "",
+    countryCode: "",
+    postalCode: "",
     contactInfo: "",
+    coordinates: null,
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
@@ -30,7 +38,11 @@ const Register = () => {
     confirmPassword,
     age,
     address,
+    city,
+    state,
     country,
+    countryCode,
+    postalCode,
     contactInfo,
   } = formData;
 
@@ -40,6 +52,50 @@ const Register = () => {
     // Clear error when user starts typing
     if (errors[name]) {
       setErrors({ ...errors, [name]: "" });
+    }
+  };
+
+  const handleLocationSelect = (locationData) => {
+    const { address, coordinates } = locationData;
+    setFormData({
+      ...formData,
+      address: address.street || address.fullAddress || "",
+      city: address.city || "",
+      state: address.state || "",
+      country: address.country || "",
+      countryCode: address.countryCode || "",
+      postalCode: address.postalCode || "",
+      coordinates: coordinates,
+    });
+    // Show a summary to the user (could be a toast or inline message)
+    if (address.fullAddress) {
+      alert(`Detected address:\n${address.fullAddress}`);
+    }
+  };
+
+  const handleCountrySelect = (country) => {
+    setFormData({
+      ...formData,
+      country: country.name,
+      countryCode: country.code,
+    });
+  };
+
+  const handleStateSelect = (state) => {
+    setFormData({
+      ...formData,
+      state: state.name,
+    });
+  };
+
+  const handlePhoneChange = (phoneNumber) => {
+    setFormData({
+      ...formData,
+      contactInfo: phoneNumber,
+    });
+    // Clear phone error when user changes number
+    if (errors.contactInfo) {
+      setErrors({ ...errors, contactInfo: "" });
     }
   };
 
@@ -84,8 +140,13 @@ const Register = () => {
       newErrors.age = "Please enter a valid age (13-120)";
     }
 
-    if (contactInfo && !/^\+?[\d\s\-\(\)]+$/.test(contactInfo)) {
-      newErrors.contactInfo = "Please enter a valid phone number";
+    if (contactInfo) {
+      // Remove all non-digit characters except + for validation
+      const cleanPhone = contactInfo.replace(/[^\d+]/g, "");
+      if (cleanPhone.length < 7 || !cleanPhone.startsWith("+")) {
+        newErrors.contactInfo =
+          "Please enter a valid phone number with country code";
+      }
     }
 
     setErrors(newErrors);
@@ -324,52 +385,92 @@ const Register = () => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="country">Country (Optional)</label>
-            <div className="input-wrapper">
-              <input
-                id="country"
-                type="text"
-                placeholder="Enter your country"
-                name="country"
-                value={country}
-                onChange={onChange}
-                disabled={isLoading}
-              />
-              <span className="input-icon">🌍</span>
+            <label>Country & Location (Optional)</label>
+            <CountrySelector
+              value={country}
+              onChange={handleCountrySelect}
+              onStateChange={handleStateSelect}
+              disabled={isLoading}
+              placeholder="Select your country"
+              showStates={true}
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Address (Optional)</label>
+            <div className="location-help-text">
+              <small>
+                Use GPS to automatically fill your address, or enter manually
+                below
+              </small>
+            </div>
+            <LocationPicker
+              onLocationSelect={handleLocationSelect}
+              disabled={isLoading}
+            />
+
+            <div className="address-inputs">
+              <div className="input-wrapper">
+                <input
+                  type="text"
+                  placeholder="Street address"
+                  name="address"
+                  value={address}
+                  onChange={onChange}
+                  disabled={isLoading}
+                />
+                <span className="input-icon">🏠</span>
+              </div>
+
+              <div className="address-row">
+                <div className="input-wrapper">
+                  <input
+                    type="text"
+                    placeholder="City"
+                    name="city"
+                    value={city}
+                    onChange={onChange}
+                    disabled={isLoading}
+                  />
+                  <span className="input-icon">🏙️</span>
+                </div>
+
+                <div className="input-wrapper">
+                  <input
+                    type="text"
+                    placeholder="State/Province"
+                    name="state"
+                    value={state}
+                    onChange={onChange}
+                    disabled={isLoading}
+                  />
+                  <span className="input-icon">🗺️</span>
+                </div>
+              </div>
+
+              <div className="input-wrapper">
+                <input
+                  type="text"
+                  placeholder="Postal/ZIP code"
+                  name="postalCode"
+                  value={postalCode}
+                  onChange={onChange}
+                  disabled={isLoading}
+                />
+                <span className="input-icon">📮</span>
+              </div>
             </div>
           </div>
 
           <div className="form-group">
-            <label htmlFor="address">Address (Optional)</label>
-            <div className="input-wrapper">
-              <input
-                id="address"
-                type="text"
-                placeholder="Enter your address"
-                name="address"
-                value={address}
-                onChange={onChange}
-                disabled={isLoading}
-              />
-              <span className="input-icon">📍</span>
-            </div>
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="contactInfo">Phone Number (Optional)</label>
-            <div className="input-wrapper">
-              <input
-                id="contactInfo"
-                type="tel"
-                placeholder="Enter your phone number"
-                name="contactInfo"
-                value={contactInfo}
-                onChange={onChange}
-                className={errors.contactInfo ? "error" : ""}
-                disabled={isLoading}
-              />
-              <span className="input-icon">📱</span>
-            </div>
+            <label>Phone Number (Optional)</label>
+            <PhoneInput
+              value={contactInfo}
+              onChange={handlePhoneChange}
+              disabled={isLoading}
+              placeholder="Enter your phone number"
+              error={!!errors.contactInfo}
+            />
             {errors.contactInfo && (
               <span className="field-error">{errors.contactInfo}</span>
             )}

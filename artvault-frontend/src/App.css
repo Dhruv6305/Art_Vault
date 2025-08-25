@@ -1738,3 +1738,486 @@ img {
     grid-template-columns: 1fr;
   }
 }
+
+/* === 
+LOCATION PICKER STYLES === */
+.location-picker {
+  margin-bottom: 1rem;
+}
+
+.location-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--surface-color);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all var(--transition-fast);
+  width: 100%;
+  justify-content: center;
+}
+
+.location-btn:hover:not(:disabled) {
+  background: var(--card-color);
+  border-color: var(--primary-color);
+  color: var(--text-accent);
+}
+
+.location-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.location-icon {
+  font-size: 1rem;
+}
+
+.spinner-small {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: var(--primary-color);
+  animation: spin 1s ease-in-out infinite;
+}
+
+.location-error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid var(--error-color);
+  border-radius: 6px;
+  color: var(--error-color);
+  font-size: 0.75rem;
+}
+
+.location-help {
+  margin-top: 0.5rem;
+  text-align: center;
+}
+
+.location-help small {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+/* === COUNTRY SELECTOR STYLES === */
+.country-selector {
+  position: relative;
+  width: 100%;
+}
+
+.country-input-wrapper {
+  position: relative;
+}
+
+.country-selector-btn {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--surface-color);
+  color: var(--text-accent);
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.country-selector-btn:hover:not(:disabled) {
+  border-color: var(--border-light);
+}
+
+.country-selector-btn:focus,
+.country-selector-btn.open {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.country-selector-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.country-display {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  text-align: left;
+}
+
+.country-flag {
+  font-size: 1.2rem;
+}
+
+.country-name {
+  flex: 1;
+}
+
+.country-code {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.placeholder {
+  color: var(--text-muted);
+}
+
+.dropdown-arrow {
+  transition: transform var(--transition-fast);
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+}
+
+.dropdown-arrow.open {
+  transform: rotate(180deg);
+}
+
+.country-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: var(--shadow-lg);
+  max-height: 300px;
+  overflow: hidden;
+  margin-top: 0.25rem;
+}
+
+.dropdown-search {
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--card-color);
+  color: var(--text-accent);
+  font-size: 0.875rem;
+  outline: none;
+}
+
+.search-input:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.dropdown-list {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.dropdown-item {
+  width: 100%;
+  padding: 0.75rem;
+  border: none;
+  background: none;
+  color: var(--text-accent);
+  cursor: pointer;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all var(--transition-fast);
+  text-align: left;
+}
+
+.dropdown-item:hover {
+  background: var(--primary-color);
+  color: white;
+}
+
+.dropdown-loading,
+.dropdown-empty {
+  padding: 1rem;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.dropdown-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+/* State Selector */
+.state-selector {
+  margin-top: 0.75rem;
+}
+
+.state-select {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--surface-color);
+  color: var(--text-accent);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.state-select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.state-select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* === PHONE INPUT STYLES === */
+.phone-input-container {
+  display: flex;
+  gap: 0.5rem;
+  align-items: stretch;
+}
+
+.country-code-selector {
+  position: relative;
+  min-width: 120px;
+}
+
+.country-code-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 0.75rem;
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-accent);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  width: 100%;
+  height: 100%;
+  font-size: 0.875rem;
+}
+
+.country-code-btn:hover:not(:disabled) {
+  border-color: var(--border-light);
+}
+
+.country-code-btn:focus,
+.country-code-btn.open {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.country-code-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.phone-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: var(--shadow-lg);
+  max-height: 250px;
+  overflow: hidden;
+  margin-top: 0.25rem;
+}
+
+.phone-number-input {
+  flex: 1;
+  padding: 0.875rem 1rem;
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-accent);
+  font-size: 1rem;
+  transition: all var(--transition-fast);
+}
+
+.phone-number-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.phone-number-input.error {
+  border-color: var(--error-color);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.phone-number-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.phone-number-input::placeholder {
+  color: var(--text-muted);
+}
+
+/* === RESPONSIVE DESIGN FOR NEW COMPONENTS === */
+@media (max-width: 768px) {
+  .phone-input-container {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .country-code-selector {
+    min-width: auto;
+  }
+
+  .country-dropdown,
+  .phone-dropdown {
+    max-height: 200px;
+  }
+
+  .dropdown-list {
+    max-height: 150px;
+  }
+}
+
+@media (max-width: 480px) {
+  .country-display {
+    gap: 0.25rem;
+  }
+
+  .country-name {
+    font-size: 0.875rem;
+  }
+
+  .country-code {
+    font-size: 0.75rem;
+  }
+
+  .dropdown-item {
+    padding: 0.625rem;
+    font-size: 0.8rem;
+  }
+}
+
+/* ===
+ ADDRESS INPUT STYLES === */
+.address-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.address-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.address-inputs .input-wrapper {
+  margin-bottom: 0;
+}
+
+.address-inputs .input-wrapper input {
+  margin-bottom: 0;
+}
+
+/* === ENHANCED FORM GROUP SPACING === */
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group:last-child {
+  margin-bottom: 0;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+/* === RESPONSIVE ADDRESS INPUTS === */
+@media (max-width: 768px) {
+  .address-row {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .address-inputs {
+    gap: 0.5rem;
+  }
+
+  .address-inputs .input-wrapper input {
+    padding: 0.75rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* 
+=== LOCATION HELP TEXT === */
+.location-help-text {
+  margin-bottom: 0.75rem;
+}
+
+.location-help-text small {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-style: italic;
+}
+
+/* === ENHANCED FORM STYLING === */
+.form-group label {
+  position: relative;
+}
+
+.form-group label::after {
+  content: '';
+  position: absolute;
+  bottom: -0.25rem;
+  left: 0;
+  width: 20px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+  border-radius: 1px;
+  opacity: 0.7;
+}
+
+/* === LOADING STATES FOR DROPDOWNS === */
+.dropdown-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.dropdown-loading .spinner-small {
+  border-top-color: var(--text-muted);
+}

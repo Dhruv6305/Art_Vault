@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useAuth } from "../context/AuthContext.jsx";
 import api from "../api/axios.js";
+import PhoneInput from "../components/ui/PhoneInput.jsx";
 
 // Countries with their phone codes
 const countriesWithCodes = [
@@ -1180,6 +1181,20 @@ const PhoneNumberInput = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const dropdownRef = useRef(null); // Ref for the dropdown container
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const filteredCountries = countriesWithCodes.filter(
     (country) =>
@@ -1229,7 +1244,7 @@ const PhoneNumberInput = ({
 
   return (
     <div className="phone-input-container">
-      <div className="country-code-dropdown">
+      <div className="country-code-dropdown" ref={dropdownRef}> {/* Add ref here */}
         <button
           type="button"
           className="country-code-button"
@@ -1349,6 +1364,8 @@ const Profile = () => {
     setIsEditing(false);
   };
 
+  const [activeTab, setActiveTab] = useState('edit'); // default to 'edit' for now
+
   return (
     <div className="profile-page">
       <div className="profile-header">
@@ -1392,174 +1409,187 @@ const Profile = () => {
         </div>
       </div>
 
-      <div className="profile-content">
-        <div className="profile-section">
-          <h2>Personal Information</h2>
-          <div className="profile-form">
-            <div className="form-group">
-              <label>Full Name</label>
-              {isEditing ? (
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  className="form-input"
-                />
-              ) : (
-                <span className="form-value">
-                  {user?.name || "Not provided"}
-                </span>
-              )}
-            </div>
-
-            <div className="form-group">
-              <label>Email Address</label>
-              {isEditing ? (
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  className="form-input"
-                />
-              ) : (
-                <span className="form-value">
-                  {user?.email || "Not provided"}
-                </span>
-              )}
-            </div>
-
-            <div className="form-group">
-              <label>Age</label>
-              {isEditing ? (
-                <input
-                  type="number"
-                  name="age"
-                  value={formData.age}
-                  onChange={handleInputChange}
-                  className="form-input"
-                />
-              ) : (
-                <span className="form-value">
-                  {user?.age || "Not provided"}
-                </span>
-              )}
-            </div>
-
-            {isEditing ? (
-              <CountryStateSelector
-                selectedCountry={formData.country}
-                selectedState={formData.state}
-                onCountryChange={(country) =>
-                  setFormData((prev) => ({ ...prev, country }))
-                }
-                onStateChange={(state) =>
-                  setFormData((prev) => ({ ...prev, state }))
-                }
-              />
-            ) : (
-              <>
-                <div className="form-group">
-                  <label>Country</label>
+      {/* Only show detailed info section if activeTab is 'edit' and isEditing is false */}
+      {activeTab === 'edit' && !isEditing && (
+        <div className="profile-content">
+          <div className="profile-section">
+            <h2>Personal Information</h2>
+            <div className="profile-form">
+              <div className="form-group">
+                <label>Full Name</label>
+                {isEditing ? (
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    className="form-input"
+                  />
+                ) : (
                   <span className="form-value">
-                    {user?.country || "Not provided"}
+                    {user?.name || "Not provided"}
                   </span>
-                </div>
-                <div className="form-group">
-                  <label>State/Province</label>
+                )}
+              </div>
+
+              <div className="form-group">
+                <label>Email Address</label>
+                {isEditing ? (
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    className="form-input"
+                  />
+                ) : (
                   <span className="form-value">
-                    {user?.state || "Not provided"}
+                    {user?.email || "Not provided"}
                   </span>
-                </div>
-              </>
-            )}
+                )}
+              </div>
 
-            <div className="form-group">
-              <label>Address</label>
+              <div className="form-group">
+                <label>Age</label>
+                {isEditing ? (
+                  <input
+                    type="number"
+                    name="age"
+                    value={formData.age}
+                    onChange={handleInputChange}
+                    className="form-input"
+                  />
+                ) : (
+                  <span className="form-value">
+                    {user?.age || "Not provided"}
+                  </span>
+                )}
+              </div>
+
               {isEditing ? (
-                <SmartAddressInput
-                  value={formData.address}
-                  onChange={(address) =>
-                    setFormData((prev) => ({ ...prev, address }))
+                <CountryStateSelector
+                  selectedCountry={formData.country}
+                  selectedState={formData.state}
+                  onCountryChange={(country) =>
+                    setFormData((prev) => ({ ...prev, country }))
                   }
-                  onLocationDataUpdate={(locationData) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      ...locationData,
-                    }))
+                  onStateChange={(state) =>
+                    setFormData((prev) => ({ ...prev, state }))
                   }
-                  placeholder="Start typing your address..."
                 />
               ) : (
-                <span className="form-value">
-                  {user?.address || "Not provided"}
-                </span>
+                <>
+                  <div className="form-group">
+                    <label>Country</label>
+                    <span className="form-value">
+                      {user?.country || "Not provided"}
+                    </span>
+                  </div>
+                  <div className="form-group">
+                    <label>State/Province</label>
+                    <span className="form-value">
+                      {user?.state || "Not provided"}
+                    </span>
+                  </div>
+                </>
               )}
-            </div>
 
-            <div className="form-group">
-              <label>Phone Number</label>
-              {isEditing ? (
-                <PhoneNumberInput
-                  countryCode={formData.phoneCountryCode}
-                  phoneNumber={formData.phoneNumber}
-                  onCountryChange={(code) =>
-                    setFormData((prev) => ({ ...prev, phoneCountryCode: code }))
-                  }
-                  onPhoneChange={(number) =>
-                    setFormData((prev) => ({ ...prev, phoneNumber: number }))
-                  }
-                />
-              ) : (
-                <span className="form-value phone-display">
-                  {user?.phoneCountryCode && user?.phoneNumber ? (
-                    <>
-                      <span className="phone-country-info">
-                        {countriesWithCodes.find(
-                          (c) => c.code === user.phoneCountryCode
-                        )?.flag || "🌍"}
-                        <span className="phone-country-name">
+              <div className="form-group">
+                <label>Address</label>
+                {isEditing ? (
+                  <SmartAddressInput
+                    value={formData.address}
+                    onChange={(address) =>
+                      setFormData((prev) => ({ ...prev, address }))
+                    }
+                    onLocationDataUpdate={(locationData) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        ...locationData,
+                      }))
+                    }
+                    placeholder="Start typing your address..."
+                  />
+                ) : (
+                  <span className="form-value">
+                    {user?.address || "Not provided"}
+                  </span>
+                )}
+              </div>
+
+              <div className="form-group">
+                <label>Phone Number</label>
+                {isEditing ? (
+                  <PhoneInput
+                    value={formData.phoneCountryCode + formData.phoneNumber}
+                    onChange={(fullNumber) => {
+                      // Extract country code and phone number
+                      const match = fullNumber.match(/^(\+\d+)(.*)$/);
+                      if (match) {
+                        setFormData((prev) => ({
+                          ...prev,
+                          phoneCountryCode: match[1],
+                          phoneNumber: match[2].trim(),
+                        }));
+                      } else {
+                        setFormData((prev) => ({
+                          ...prev,
+                          phoneCountryCode: "+1",
+                          phoneNumber: fullNumber,
+                        }));
+                      }
+                    }}
+                    disabled={loading}
+                    placeholder="Enter your phone number"
+                  />
+                ) : (
+                  <span className="form-value phone-display">
+                    {user?.phoneCountryCode && user?.phoneNumber ? (
+                      <>
+                        <span className="phone-country-info">
                           {countriesWithCodes.find(
                             (c) => c.code === user.phoneCountryCode
-                          )?.name || "Unknown"}
+                          )?.flag || "🌍"}
+                          <span className="phone-country-code">
+                            {user.phoneCountryCode}
+                          </span>
                         </span>
-                      </span>
-                      <span className="phone-full-number">
-                        {user.phoneCountryCode} {user.phoneNumber}
-                      </span>
-                    </>
-                  ) : (
-                    "Not provided"
-                  )}
-                </span>
-              )}
+                        <span className="phone-full-number">
+                          {user.phoneNumber}
+                        </span>
+                      </>
+                    ) : (
+                      "Not provided"
+                    )}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="profile-section">
-          <h2>Account Statistics</h2>
-          <div className="stats-grid">
-            <div className="stat-card">
-              <h3>Artworks</h3>
-              <p>0</p>
-            </div>
-            <div className="stat-card">
-              <h3>Collections</h3>
-              <p>0</p>
-            </div>
-            <div className="stat-card">
-              <h3>Favorites</h3>
-              <p>0</p>
-            </div>
-            <div className="stat-card">
-              <h3>Purchases</h3>
-              <p>0</p>
+          <div className="profile-section">
+            <h2>Account Statistics</h2>
+            <div className="stats-grid">
+              <div className="stat-card">
+                <h3>Artworks</h3>
+                <p>0</p>
+              </div>
+              <div className="stat-card">
+                <h3>Collections</h3>
+                <p>0</p>
+              </div>
+              <div className="stat-card">
+                <h3>Favorites</h3>
+                <p>0</p>
+              </div>
+              <div className="stat-card">
+                <h3>Purchases</h3>
+                <p>0</p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
