@@ -29,6 +29,33 @@ const Sidebar = ({ isOpen, onClose }) => {
       ],
     },
     {
+      section: "artwork",
+      title: "Artwork",
+      items: [
+        {
+          id: "add-artwork",
+          label: "Add New Artwork",
+          icon: "➕",
+          action: "navigate",
+          path: "/add-artwork",
+        },
+        {
+          id: "my-artworks",
+          label: "My Artworks",
+          icon: "🎨",
+          action: "navigate",
+          path: "/my-artworks",
+        },
+        {
+          id: "browse",
+          label: "Browse Art",
+          icon: "🔍",
+          action: "navigate",
+          path: "/browse",
+        },
+      ],
+    },
+    {
       section: "activity",
       title: "Activity",
       items: [
@@ -81,7 +108,7 @@ const Sidebar = ({ isOpen, onClose }) => {
                     }`}
                     onClick={() => {
                       if (item.action === "navigate") {
-                        navigate("/profile");
+                        navigate(item.path || "/profile");
                         onClose();
                       } else {
                         setActiveSection(item.id);

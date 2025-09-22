@@ -11,6 +11,11 @@ import Marketplace from "./pages/Marketplace.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import Profile from "./pages/Profile.jsx";
 import AuthSuccess from "./pages/AuthSuccess.jsx";
+import AddArtwork from "./pages/AddArtwork.jsx";
+import MyArtworks from "./pages/MyArtworks.jsx";
+import BrowseArtworks from "./pages/BrowseArtworks.jsx";
+import ArtworkDetail from "./pages/ArtworkDetail.jsx";
+import TestFolderUpload from "./pages/TestFolderUpload.jsx";
 import ToastContainer from "./components/ui/ToastContainer.jsx";
 import { useToast } from "./hooks/useToast.js";
 
@@ -66,8 +71,13 @@ function App() {
               }
             />
             <Route path="/marketplace" element={<Marketplace />} />
+            <Route path="/browse" element={<BrowseArtworks />} />
+            <Route path="/artwork/:id" element={<ArtworkDetail />} />
+            <Route path="/add-artwork" element={<AddArtwork />} />
+            <Route path="/my-artworks" element={<MyArtworks />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/test-folder" element={<TestFolderUpload />} />
             <Route path="/auth/success" element={<AuthSuccess />} />
           </Routes>
         </main>

@@ -3,8 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import api from "../api/axios.js";
 import PasswordStrength from "../components/ui/PasswordStrength.jsx";
-import LocationPicker from "../components/ui/LocationPicker.jsx";
-import CountrySelector from "../components/ui/CountrySelector.jsx";
+import DetailedAddressForm from "../components/ui/DetailedAddressForm.jsx";
 import PhoneInput from "../components/ui/PhoneInput.jsx";
 
 const Register = () => {
@@ -16,13 +15,18 @@ const Register = () => {
     password: "",
     confirmPassword: "",
     age: "",
-    address: "",
+    contactInfo: "",
+    // Detailed address fields
+    streetNumber: "",
+    streetName: "",
+    apartment: "",
     city: "",
     state: "",
     country: "",
     countryCode: "",
     postalCode: "",
-    contactInfo: "",
+    neighborhood: "",
+    landmark: "",
     coordinates: null,
   });
   const [errors, setErrors] = useState({});
@@ -31,20 +35,7 @@ const Register = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
 
-  const {
-    name,
-    email,
-    password,
-    confirmPassword,
-    age,
-    address,
-    city,
-    state,
-    country,
-    countryCode,
-    postalCode,
-    contactInfo,
-  } = formData;
+  const { name, email, password, confirmPassword, age, contactInfo } = formData;
 
   const onChange = (e) => {
     const { name, value } = e.target;
@@ -55,37 +46,8 @@ const Register = () => {
     }
   };
 
-  const handleLocationSelect = (locationData) => {
-    const { address, coordinates } = locationData;
-    setFormData({
-      ...formData,
-      address: address.street || address.fullAddress || "",
-      city: address.city || "",
-      state: address.state || "",
-      country: address.country || "",
-      countryCode: address.countryCode || "",
-      postalCode: address.postalCode || "",
-      coordinates: coordinates,
-    });
-    // Show a summary to the user (could be a toast or inline message)
-    if (address.fullAddress) {
-      alert(`Detected address:\n${address.fullAddress}`);
-    }
-  };
-
-  const handleCountrySelect = (country) => {
-    setFormData({
-      ...formData,
-      country: country.name,
-      countryCode: country.code,
-    });
-  };
-
-  const handleStateSelect = (state) => {
-    setFormData({
-      ...formData,
-      state: state.name,
-    });
+  const handleAddressChange = (addressData) => {
+    setFormData((prev) => ({ ...prev, ...addressData }));
   };
 
   const handlePhoneChange = (phoneNumber) => {
@@ -385,81 +347,13 @@ const Register = () => {
           </div>
 
           <div className="form-group">
-            <label>Country & Location (Optional)</label>
-            <CountrySelector
-              value={country}
-              onChange={handleCountrySelect}
-              onStateChange={handleStateSelect}
+            <label>Address Information (Optional)</label>
+            <DetailedAddressForm
+              formData={formData}
+              onChange={handleAddressChange}
               disabled={isLoading}
-              placeholder="Select your country"
-              showStates={true}
+              showLabels={true}
             />
-          </div>
-
-          <div className="form-group">
-            <label>Address (Optional)</label>
-            <div className="location-help-text">
-              <small>
-                Use GPS to automatically fill your address, or enter manually
-                below
-              </small>
-            </div>
-            <LocationPicker
-              onLocationSelect={handleLocationSelect}
-              disabled={isLoading}
-            />
-
-            <div className="address-inputs">
-              <div className="input-wrapper">
-                <input
-                  type="text"
-                  placeholder="Street address"
-                  name="address"
-                  value={address}
-                  onChange={onChange}
-                  disabled={isLoading}
-                />
-                <span className="input-icon">🏠</span>
-              </div>
-
-              <div className="address-row">
-                <div className="input-wrapper">
-                  <input
-                    type="text"
-                    placeholder="City"
-                    name="city"
-                    value={city}
-                    onChange={onChange}
-                    disabled={isLoading}
-                  />
-                  <span className="input-icon">🏙️</span>
-                </div>
-
-                <div className="input-wrapper">
-                  <input
-                    type="text"
-                    placeholder="State/Province"
-                    name="state"
-                    value={state}
-                    onChange={onChange}
-                    disabled={isLoading}
-                  />
-                  <span className="input-icon">🗺️</span>
-                </div>
-              </div>
-
-              <div className="input-wrapper">
-                <input
-                  type="text"
-                  placeholder="Postal/ZIP code"
-                  name="postalCode"
-                  value={postalCode}
-                  onChange={onChange}
-                  disabled={isLoading}
-                />
-                <span className="input-icon">📮</span>
-              </div>
-            </div>
           </div>
 
           <div className="form-group">

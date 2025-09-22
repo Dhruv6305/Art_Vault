@@ -52,8 +52,24 @@ const Navbar = () => {
         <nav className="main-nav">
           <ul>
             <li>
+              <Link to="/browse">Browse Art</Link>
+            </li>
+            <li>
               <Link to="/marketplace">Marketplace</Link>
             </li>
+            {isAuthenticated ? (
+              <>
+                <li>
+                  <Link to="/add-artwork">Sell Art</Link>
+                </li>
+                <li>
+                  <Link to="/my-artworks">My Art</Link>
+                </li>
+                <li>
+                  <Link to="/test-folder">Test Folder</Link>
+                </li>
+              </>
+            ) : null}
             {isAuthenticated ? (
               <>
                 <li>

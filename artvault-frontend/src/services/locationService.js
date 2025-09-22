@@ -61,17 +61,19 @@ export class LocationService {
 
       return {
         fullAddress: data.display_name || "Address not found",
+        houseNumber: streetNumber,
+        road: streetName,
         street: street,
-        city:
-          address.city ||
-          address.town ||
-          address.village ||
-          "",
-        state: address.state || "",
+        apartment: address.unit || address.apartment || "",
+        city: address.city || address.town || address.village || "",
+        state: address.state || address.province || "",
         county: address.county || "",
         country: address.country || "",
         countryCode: address.country_code?.toUpperCase() || "",
-        postalCode: address.postcode || "",
+        postcode: address.postcode || "",
+        zipCode: address.postcode || "",
+        neighbourhood: address.neighbourhood || address.suburb || "",
+        landmark: address.amenity || address.shop || "",
       };
     } catch (error) {
       throw new Error("Failed to get address from coordinates");
