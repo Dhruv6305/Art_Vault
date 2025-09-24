@@ -332,6 +332,7 @@ exports.uploadFiles = async (req, res) => {
     const files = req.files.map((file) => {
       // Convert file path to URL format
       const relativePath = file.path.replace(/\\/g, "/").replace("src/", "");
+      console.log("File path:", file.path, "-> Relative path:", relativePath);
 
       return {
         type: file.mimetype.startsWith("image/")
@@ -341,7 +342,7 @@ exports.uploadFiles = async (req, res) => {
           : file.mimetype.startsWith("audio/")
           ? "audio"
           : "document",
-        url: `${baseUrl}/${relativePath}`,
+        url: relativePath, // Store relative path without base URL
         localPath: file.path,
         filename: file.originalname,
         savedAs: file.filename,
@@ -392,7 +393,12 @@ exports.uploadFolder = async (req, res) => {
 
       // Use the file path as provided by multer
       const relativePath = file.path.replace(/\\/g, "/").replace("src/", "");
-      const fileUrl = `${baseUrl}/${relativePath}`;
+      console.log(
+        "Folder file path:",
+        file.path,
+        "-> Relative path:",
+        relativePath
+      );
 
       processedFiles.push({
         type: file.mimetype.startsWith("image/")
@@ -402,7 +408,7 @@ exports.uploadFolder = async (req, res) => {
           : file.mimetype.startsWith("audio/")
           ? "audio"
           : "document",
-        url: fileUrl,
+        url: relativePath, // Store relative path without base URL
         filename: file.originalname,
         originalPath: file.originalname,
         size: file.size,

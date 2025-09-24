@@ -6,6 +6,7 @@ import FileUpload from "../components/ui/FileUpload.jsx";
 import FolderUpload from "../components/ui/FolderUpload.jsx";
 import ArtworkForm from "../components/ui/ArtworkForm.jsx";
 import DebugArtwork from "../components/DebugArtwork.jsx";
+import TestFileDisplay from "../components/TestFileDisplay.jsx";
 
 const AddArtwork = () => {
   const navigate = useNavigate();
@@ -268,6 +269,7 @@ const AddArtwork = () => {
   return (
     <div className="add-artwork-page">
       <DebugArtwork />
+      <TestFileDisplay />
       <div className="add-artwork-container">
         <div className="add-artwork-header">
           <h1>Add New Artwork</h1>

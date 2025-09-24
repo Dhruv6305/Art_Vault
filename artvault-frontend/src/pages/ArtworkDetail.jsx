@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
+import PaymentModal from "../components/payment/PaymentModal.jsx";
 import api from "../api/axios.js";
 
 const ArtworkDetail = () => {
@@ -13,6 +14,8 @@ const ArtworkDetail = () => {
   const [liked, setLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [currentQuantity, setCurrentQuantity] = useState(null);
 
   useEffect(() => {
     fetchArtwork();
@@ -23,6 +26,7 @@ const ArtworkDetail = () => {
       const response = await api.get(`/artworks/${id}`);
       if (response.data.success) {
         setArtwork(response.data.artwork);
+        setCurrentQuantity(response.data.artwork.quantity);
         setLiked(
           response.data.artwork.likes?.some((like) => like.user === user?.id) ||
             false
@@ -63,34 +67,71 @@ const ArtworkDetail = () => {
     return formatter.format(price.amount);
   };
 
+  const formatDimensions = (dimensions) => {
+    if (!dimensions) return "";
+
+    // If it's already a string, return it
+    if (typeof dimensions === "string") return dimensions;
+
+    // If it's an object, format it
+    if (typeof dimensions === "object") {
+      const { width, height, depth, unit } = dimensions;
+      if (depth && depth !== "0" && depth !== 0) {
+        return `${width} × ${height} × ${depth} ${unit || "cm"}`;
+      } else {
+        return `${width} × ${height} ${unit || "cm"}`;
+      }
+    }
+
+    return String(dimensions);
+  };
+
   const getFilePreview = (file, index) => {
-    const baseUrl = `http://localhost:5000/${file.url}`;
+    // Construct the full URL for the file
+    const fileUrl = file.url.startsWith("http")
+      ? file.url
+      : `http://localhost:5000/${file.url}`;
+
+    console.log("Detail file URL:", fileUrl);
 
     switch (file.type) {
       case "image":
         return (
           <img
             key={index}
-            src={baseUrl}
+            src={fileUrl}
             alt={artwork.title}
             className="artwork-detail-image"
             onClick={() => setCurrentImageIndex(index)}
+            onError={(e) => {
+              console.error("Detail image failed to load:", fileUrl);
+              e.target.style.display = "none";
+            }}
           />
         );
       case "video":
         return (
           <video
             key={index}
-            src={baseUrl}
+            src={fileUrl}
             className="artwork-detail-video"
             controls
+            onError={(e) => {
+              console.error("Video failed to load:", fileUrl);
+            }}
           />
         );
       case "audio":
         return (
           <div key={index} className="artwork-detail-audio">
             <div className="audio-icon">🎵</div>
-            <audio src={baseUrl} controls />
+            <audio
+              src={fileUrl}
+              controls
+              onError={(e) => {
+                console.error("Audio failed to load:", fileUrl);
+              }}
+            />
             <span className="audio-filename">{file.filename}</span>
           </div>
         );
@@ -99,7 +140,7 @@ const ArtworkDetail = () => {
           <div key={index} className="artwork-detail-document">
             <div className="document-icon">📄</div>
             <a
-              href={baseUrl}
+              href={fileUrl}
               download={file.filename}
               className="document-link"
             >
@@ -130,9 +171,17 @@ const ArtworkDetail = () => {
           {imageFiles.length > 0 && (
             <div className="main-image-container">
               <img
-                src={`http://localhost:5000/${imageFiles[currentImageIndex]?.url}`}
+                src={
+                  imageFiles[currentImageIndex]?.url.startsWith("http")
+                    ? imageFiles[currentImageIndex]?.url
+                    : `http://localhost:5000/${imageFiles[currentImageIndex]?.url}`
+                }
                 alt={artwork.title}
                 className="main-artwork-image"
+                onError={(e) => {
+                  console.error("Main image failed to load:", e.target.src);
+                  e.target.style.display = "none";
+                }}
               />
 
               {imageFiles.length > 1 && (
@@ -140,12 +189,23 @@ const ArtworkDetail = () => {
                   {imageFiles.map((file, index) => (
                     <img
                       key={index}
-                      src={`http://localhost:5000/${file.url}`}
+                      src={
+                        file.url.startsWith("http")
+                          ? file.url
+                          : `http://localhost:5000/${file.url}`
+                      }
                       alt={`${artwork.title} ${index + 1}`}
                       className={`thumbnail ${
                         index === currentImageIndex ? "active" : ""
                       }`}
                       onClick={() => setCurrentImageIndex(index)}
+                      onError={(e) => {
+                        console.error(
+                          "Thumbnail failed to load:",
+                          e.target.src
+                        );
+                        e.target.style.opacity = "0.3";
+                      }}
                     />
                   ))}
                 </div>
@@ -186,10 +246,27 @@ const ArtworkDetail = () => {
               )}
             </div>
 
-            {artwork.quantity > 1 && (
+            {(currentQuantity || artwork.quantity) > 0 && (
               <div className="quantity-display">
                 <span className="quantity-label">Available Copies:</span>
-                <span className="quantity-value">{artwork.quantity}</span>
+                <span
+                  className={`quantity-value ${
+                    (currentQuantity || artwork.quantity) <= 5
+                      ? "low-stock"
+                      : ""
+                  }`}
+                >
+                  {currentQuantity !== null
+                    ? currentQuantity
+                    : artwork.quantity}
+                </span>
+                {(currentQuantity || artwork.quantity) <= 5 &&
+                  (currentQuantity || artwork.quantity) > 0 && (
+                    <span className="low-stock-warning">⚠️ Limited stock!</span>
+                  )}
+                {(currentQuantity || artwork.quantity) === 0 && (
+                  <span className="sold-out">❌ Sold Out</span>
+                )}
               </div>
             )}
           </div>
@@ -210,7 +287,9 @@ const ArtworkDetail = () => {
             {artwork.dimensions && (
               <div className="detail-item">
                 <span className="detail-label">Dimensions:</span>
-                <span className="detail-value">{artwork.dimensions}</span>
+                <span className="detail-value">
+                  {formatDimensions(artwork.dimensions)}
+                </span>
               </div>
             )}
 
@@ -274,10 +353,39 @@ const ArtworkDetail = () => {
 
           <div className="contact-artist-section">
             <button className="contact-btn">Contact Artist</button>
-            <button className="add-to-cart-btn">Add to Cart</button>
+            <button
+              className="buy-now-btn"
+              onClick={() => setShowPaymentModal(true)}
+              disabled={
+                (currentQuantity !== null
+                  ? currentQuantity
+                  : artwork.quantity) === 0
+              }
+            >
+              {(currentQuantity !== null
+                ? currentQuantity
+                : artwork.quantity) === 0
+                ? "Sold Out"
+                : "Buy Now"}
+            </button>
           </div>
         </div>
       </div>
+
+      <PaymentModal
+        artwork={{
+          ...artwork,
+          quantity:
+            currentQuantity !== null ? currentQuantity : artwork.quantity,
+        }}
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        quantity={1}
+        onOrderComplete={(remainingQuantity) => {
+          setCurrentQuantity(remainingQuantity);
+          setShowPaymentModal(false);
+        }}
+      />
     </div>
   );
 };

@@ -48,26 +48,59 @@ const ArtworkCard = ({ artwork, showActions = true }) => {
     return formatter.format(price.amount);
   };
 
+  const formatDimensions = (dimensions) => {
+    if (!dimensions) return "";
+
+    // If it's already a string, return it
+    if (typeof dimensions === "string") return dimensions;
+
+    // If it's an object, format it
+    if (typeof dimensions === "object") {
+      const { width, height, depth, unit } = dimensions;
+      if (depth && depth !== "0" && depth !== 0) {
+        return `${width} × ${height} × ${depth} ${unit || "cm"}`;
+      } else {
+        return `${width} × ${height} ${unit || "cm"}`;
+      }
+    }
+
+    return String(dimensions);
+  };
+
   const getFilePreview = (file) => {
     if (!file) return null;
+
+    // Construct the full URL for the file
+    const fileUrl = file.url.startsWith("http")
+      ? file.url
+      : `http://localhost:5000/${file.url}`;
+
+    console.log("File preview URL:", fileUrl);
 
     switch (file.type) {
       case "image":
         return (
           <img
-            src={`http://localhost:5000/${file.url}`}
+            src={fileUrl}
             alt={artwork.title}
             className="artwork-image"
+            onError={(e) => {
+              console.error("Image failed to load:", fileUrl);
+              e.target.style.display = "none";
+            }}
           />
         );
       case "video":
         return (
           <video
-            src={`http://localhost:5000/${file.url}`}
+            src={fileUrl}
             className="artwork-video"
             controls={false}
             muted
-            poster={`http://localhost:5000/${file.url}#t=1`}
+            poster={`${fileUrl}#t=1`}
+            onError={(e) => {
+              console.error("Video failed to load:", fileUrl);
+            }}
           />
         );
       case "audio":
@@ -84,6 +117,11 @@ const ArtworkCard = ({ artwork, showActions = true }) => {
                   : "Audio"}
               </span>
             </div>
+            <audio
+              src={fileUrl}
+              controls
+              style={{ width: "100%", marginTop: "0.5rem" }}
+            />
           </div>
         );
       default:

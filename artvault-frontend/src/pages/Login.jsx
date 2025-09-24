@@ -11,6 +11,22 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
+  // Check for OAuth errors in URL params
+  React.useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const error = urlParams.get("error");
+    if (error) {
+      const errorMessages = {
+        auth_failed: "Google authentication failed. Please try again.",
+        token_error: "Authentication token error. Please try again.",
+        callback_error: "Authentication callback error. Please try again.",
+      };
+      setErrors({
+        general: errorMessages[error] || "Authentication error occurred.",
+      });
+    }
+  }, []);
+
   const { email, password } = formData;
 
   const onChange = (e) => {

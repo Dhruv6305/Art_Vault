@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext.jsx";
 import Sidebar from "./Sidebar.jsx";
+import NotificationBell from "../notifications/NotificationBell.jsx";
 
 const Navbar = () => {
   const { user, logout, isAuthenticated, loading } = useAuth();
@@ -68,12 +69,21 @@ const Navbar = () => {
                 <li>
                   <Link to="/test-folder">Test Folder</Link>
                 </li>
+                <li>
+                  <Link to="/test-payment">Test Payment</Link>
+                </li>
               </>
             ) : null}
             {isAuthenticated ? (
               <>
                 <li>
                   <Link to="/dashboard">Dashboard</Link>
+                </li>
+                <li>
+                  <Link to="/orders">Orders</Link>
+                </li>
+                <li>
+                  <NotificationBell />
                 </li>
                 <li>
                   <span>Welcome, {user?.name}</span>
