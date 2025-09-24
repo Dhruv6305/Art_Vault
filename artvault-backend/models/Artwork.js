@@ -87,7 +87,7 @@ const ArtworkSchema = new mongoose.Schema({
   // Artist/Seller information
   artist: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "user",
+    ref: "User",
     required: true,
   },
   artistName: { type: String, required: true },
@@ -111,7 +111,7 @@ const ArtworkSchema = new mongoose.Schema({
   views: { type: Number, default: 0 },
   likes: [
     {
-      user: { type: mongoose.Schema.Types.ObjectId, ref: "user" },
+      user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
       date: { type: Date, default: Date.now },
     },
   ],

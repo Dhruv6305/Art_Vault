@@ -114,54 +114,56 @@ const createOrder = async (req, res) => {
 
     await notification.save();
 
-    // Send email to artist
-    try {
-      await sendEmail({
-        to: artwork.artist.email,
-        subject: `🎉 Great News! Your artwork "${artwork.title}" has been sold!`,
-        template: "artistSaleNotification",
-        data: {
-          artistName: artwork.artist.name,
-          artworkTitle: artwork.title,
-          quantity,
-          total: total.toFixed(2),
-          buyerName: shippingInfo.fullName,
-          buyerEmail: shippingInfo.email,
-          orderId: order._id,
-          remainingQuantity: artwork.quantity,
-          shippingMethod,
-          estimatedDelivery: getEstimatedDelivery(shippingMethod),
-        },
-      });
-    } catch (emailError) {
-      console.error("Failed to send artist notification email:", emailError);
-    }
+    // Send email to artist (non-blocking)
+    sendEmail({
+      to: artwork.artist.email,
+      subject: `🎉 Great News! Your artwork "${artwork.title}" has been sold!`,
+      template: "artistSaleNotification",
+      data: {
+        artistName: artwork.artist.name,
+        artworkTitle: artwork.title,
+        quantity,
+        total: total.toFixed(2),
+        buyerName: shippingInfo.fullName,
+        buyerEmail: shippingInfo.email,
+        orderId: order._id,
+        remainingQuantity: artwork.quantity,
+        shippingMethod,
+        estimatedDelivery: getEstimatedDelivery(shippingMethod),
+      },
+    }).catch((emailError) => {
+      console.error(
+        "📧 Failed to send artist notification email:",
+        emailError.message
+      );
+    });
 
-    // Send confirmation email to buyer
-    try {
-      await sendEmail({
-        to: shippingInfo.email,
-        subject: `Order Confirmation - ${artwork.title}`,
-        template: "orderConfirmation",
-        data: {
-          buyerName: shippingInfo.fullName,
-          artworkTitle: artwork.title,
-          artistName: artwork.artist.name,
-          quantity,
-          subtotal: subtotal.toFixed(2),
-          tax: tax.toFixed(2),
-          shipping: shipping.toFixed(2),
-          total: total.toFixed(2),
-          orderId: order._id,
-          transactionId: paymentData.transactionId,
-          shippingAddress: shippingInfo,
-          shippingMethod,
-          estimatedDelivery: getEstimatedDelivery(shippingMethod),
-        },
-      });
-    } catch (emailError) {
-      console.error("Failed to send buyer confirmation email:", emailError);
-    }
+    // Send confirmation email to buyer (non-blocking)
+    sendEmail({
+      to: shippingInfo.email,
+      subject: `Order Confirmation - ${artwork.title}`,
+      template: "orderConfirmation",
+      data: {
+        buyerName: shippingInfo.fullName,
+        artworkTitle: artwork.title,
+        artistName: artwork.artist.name,
+        quantity,
+        subtotal: subtotal.toFixed(2),
+        tax: tax.toFixed(2),
+        shipping: shipping.toFixed(2),
+        total: total.toFixed(2),
+        orderId: order._id,
+        transactionId: paymentData.transactionId,
+        shippingAddress: shippingInfo,
+        shippingMethod,
+        estimatedDelivery: getEstimatedDelivery(shippingMethod),
+      },
+    }).catch((emailError) => {
+      console.error(
+        "📧 Failed to send buyer confirmation email:",
+        emailError.message
+      );
+    });
 
     // Populate order for response
     const populatedOrder = await Order.findById(order._id)
@@ -176,17 +178,36 @@ const createOrder = async (req, res) => {
       remainingQuantity: artwork.quantity,
     });
   } catch (error) {
-    console.error("Create order error:", error);
-    console.error("Error stack:", error.stack);
-    console.error("Error details:", {
+    console.error("❌ Create order error:", error.message);
+    console.error("📋 Error stack:", error.stack);
+    console.error("🔍 Error details:", {
       message: error.message,
       name: error.name,
+      code: error.code,
       artworkId: req.body.artworkId,
       userId: req.user?.id,
+      requestBody: JSON.stringify(req.body, null, 2),
     });
-    res
-      .status(500)
-      .json({ success: false, msg: "Server error", error: error.message });
+
+    // Provide more specific error messages
+    let errorMessage = "Server error occurred while creating order";
+
+    if (error.name === "ValidationError") {
+      errorMessage = "Invalid order data: " + error.message;
+    } else if (error.name === "CastError") {
+      errorMessage = "Invalid ID format in order data";
+    } else if (error.code === 11000) {
+      errorMessage = "Duplicate order detected";
+    }
+
+    res.status(500).json({
+      success: false,
+      msg: errorMessage,
+      error:
+        process.env.NODE_ENV === "development"
+          ? error.message
+          : "Internal server error",
+    });
   }
 };
 

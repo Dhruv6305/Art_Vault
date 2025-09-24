@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import api from "../api/axios.js";
 import { formatPrice } from "../utils/formatters.js";
 
 const Orders = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -59,6 +61,10 @@ const Orders = () => {
       hour: "2-digit",
       minute: "2-digit",
     });
+  };
+
+  const handleViewDetails = (orderId) => {
+    navigate(`/orders/${orderId}`);
   };
 
   if (loading) return <div className="loading">Loading orders...</div>;
@@ -178,7 +184,12 @@ const Orders = () => {
 
                 <div className="order-footer">
                   <div className="order-actions">
-                    <button className="view-details-btn">View Details</button>
+                    <button 
+                      className="view-details-btn"
+                      onClick={() => handleViewDetails(order._id)}
+                    >
+                      View Details
+                    </button>
                     {activeTab === "purchases" &&
                       order.status === "delivered" && (
                         <button className="review-btn">Leave Review</button>

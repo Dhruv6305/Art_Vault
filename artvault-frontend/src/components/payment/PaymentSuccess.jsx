@@ -1,6 +1,8 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 const PaymentSuccess = ({ artwork, orderData, onClose }) => {
+  const navigate = useNavigate();
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
@@ -168,6 +170,14 @@ const PaymentSuccess = ({ artwork, orderData, onClose }) => {
         <button className="primary-btn" onClick={onClose}>
           Continue Shopping
         </button>
+        {orderData?.orderId && (
+          <button 
+            className="secondary-btn" 
+            onClick={() => navigate(`/orders/${orderData.orderId}`)}
+          >
+            View Order Details
+          </button>
+        )}
         <button className="secondary-btn" onClick={() => window.print()}>
           Print Receipt
         </button>
