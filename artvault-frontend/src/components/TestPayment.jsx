@@ -33,7 +33,7 @@ const TestPayment = () => {
   };
 
   return (
-    <div style={{ padding: "20px", textAlign: "center" }}>
+    <div style={{ padding: "60px", textAlign: "center" }}>
       <h2>Payment System Test</h2>
       <div
         style={{

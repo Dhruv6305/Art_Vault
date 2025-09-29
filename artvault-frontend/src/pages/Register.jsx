@@ -160,17 +160,19 @@ const Register = () => {
         <p>Join ArtVault and start your creative journey</p>
       </div>
 
-      <div className="step-indicator">
-        <div className={`step ${currentStep >= 1 ? "active" : ""}`}>
-          <span className="step-number">1</span>
-          <span className="step-label">Account Info</span>
-        </div>
-        <div className="step-divider"></div>
-        <div className={`step ${currentStep >= 2 ? "active" : ""}`}>
-          <span className="step-number">2</span>
-          <span className="step-label">Personal Details</span>
-        </div>
-      </div>
+                      <div className="step-indicator">
+              <div className={`step ${currentStep >= 1 ? "active" : ""}`}>
+                <div className="step-number">1</div>
+                <div className="step-label">Account Info</div>
+              </div>
+
+              <div className="step-divider"></div>
+
+              <div className={`step ${currentStep >= 2 ? "active" : ""}`}>
+                <div className="step-number">2</div>
+                <div className="step-label">Personal Details</div>
+              </div>
+            </div>
 
       {errors.general && (
         <div className="error-message">
@@ -218,7 +220,7 @@ const Register = () => {
 
           <form className="auth-form">
             <div className="form-group">
-              <label htmlFor="name">Full Name</label>
+              <label style={{ color: "white" }} htmlFor="name">Full Name</label>
               <div className="input-wrapper">
                 <input
                   id="name"
@@ -238,7 +240,7 @@ const Register = () => {
             </div>
 
             <div className="form-group">
-              <label htmlFor="email">Email Address</label>
+              <label style={{ color: "white" }} htmlFor="email">Email Address</label>
               <div className="input-wrapper">
                 <input
                   id="email"
@@ -258,7 +260,7 @@ const Register = () => {
             </div>
 
             <div className="form-group">
-              <label htmlFor="password">Password</label>
+              <label style={{ color: "white" }} htmlFor="password">Password</label>
               <div className="input-wrapper">
                 <input
                   id="password"
@@ -286,7 +288,7 @@ const Register = () => {
             </div>
 
             <div className="form-group">
-              <label htmlFor="confirmPassword">Confirm Password</label>
+              <label style={{ color: "white" }} htmlFor="confirmPassword">Confirm Password</label>
               <div className="input-wrapper">
                 <input
                   id="confirmPassword"
@@ -311,7 +313,8 @@ const Register = () => {
                 <span className="field-error">{errors.confirmPassword}</span>
               )}
             </div>
-
+            
+            <div style={{ display: "flex", justifyContent: "center", marginTop: "1rem" }}>
             <button
               type="button"
               onClick={handleNextStep}
@@ -320,6 +323,7 @@ const Register = () => {
             >
               Continue
             </button>
+            </div>
           </form>
         </>
       )}
@@ -327,7 +331,7 @@ const Register = () => {
       {currentStep === 2 && (
         <form onSubmit={onSubmit} className="auth-form">
           <div className="form-group">
-            <label htmlFor="age">Age (Optional)</label>
+            <label style={{ color: "white" }} htmlFor="age">Age (Optional)</label>
             <div className="input-wrapper">
               <input
                 id="age"
@@ -347,7 +351,7 @@ const Register = () => {
           </div>
 
           <div className="form-group">
-            <label>Address Information (Optional)</label>
+            <label style={{ color: "white" }}>Address Information (Optional)</label>
             <DetailedAddressForm
               formData={formData}
               onChange={handleAddressChange}
@@ -357,7 +361,7 @@ const Register = () => {
           </div>
 
           <div className="form-group">
-            <label>Phone Number (Optional)</label>
+            <label style={{ color: "white" }}>Phone Number (Optional)</label>
             <PhoneInput
               value={contactInfo}
               onChange={handlePhoneChange}

@@ -122,7 +122,7 @@ const ArtworkForm = ({ formData, categories, errors, onChange }) => {
       {/* Dimensions - only show for physical artworks */}
       {formData.artworkType !== "digital" && formData.artworkType !== "nft" && (
         <div className="dimensions-section">
-          <h4>Dimensions</h4>
+          <h4><label>DIMENSIONS</label></h4>
           <div className="form-row">
             <div className="form-group">
               <label htmlFor="dimensions.width">Width</label>

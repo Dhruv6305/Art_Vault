@@ -124,7 +124,7 @@ const MyArtworks = () => {
 
   return (
     <div className="my-artworks-page">
-      <DebugUser />
+      {false && <DebugUser />}
       <div className="my-artworks-header">
         <div className="header-content">
           <h1>My Artworks</h1>

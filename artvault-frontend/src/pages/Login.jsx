@@ -129,7 +129,7 @@ const Login = () => {
 
       <form onSubmit={onSubmit} className="auth-form">
         <div className="form-group">
-          <label htmlFor="email">Email Address</label>
+          <label htmlFor="email" style={{ color: "white" }}>Email Address</label>
           <div className="input-wrapper">
             <input
               id="email"
@@ -147,7 +147,7 @@ const Login = () => {
         </div>
 
         <div className="form-group">
-          <label htmlFor="password">Password</label>
+          <label htmlFor="password" style={{ color: "white" }}>Password</label>
           <div className="input-wrapper">
             <input
               id="password"
@@ -172,8 +172,9 @@ const Login = () => {
             <span className="field-error">{errors.password}</span>
           )}
         </div>
-
+        <div style={{ display: "flex", justifyContent: "center", marginTop: "1rem" }}>
         <button
+
           type="submit"
           className={`btn btn-primary ${isLoading ? "loading" : ""}`}
           disabled={isLoading}
@@ -187,6 +188,7 @@ const Login = () => {
             "Sign In"
           )}
         </button>
+        </div>
       </form>
 
       <div className="auth-footer">

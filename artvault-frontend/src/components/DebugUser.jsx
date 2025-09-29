@@ -21,15 +21,7 @@ const DebugUser = () => {
   }
 
   return (
-    <div
-      style={{
-        padding: "10px",
-        background: "#d4edda",
-        border: "1px solid #c3e6cb",
-        borderRadius: "4px",
-        margin: "10px",
-      }}
-    >
+    <div>
       <strong>Debug User Object:</strong>
       <pre style={{ fontSize: "12px", margin: "5px 0" }}>
         {JSON.stringify(user, null, 2)}

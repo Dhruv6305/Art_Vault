@@ -16,13 +16,20 @@ const Sidebar = ({ isOpen, onClose }) => {
   const navigationItems = [
     {
       section: "account",
-      title: "Account",
+      title: "My Account",
       items: [
         {
           id: "profile",
           label: "Edit Profile",
           icon: "👤",
           action: "navigate",
+        },
+        {
+          id: "dashboard",
+          label: "My Dashboard",
+          icon: "🚀",
+          action: "navigate",
+          path: "dashboard"
         },
         { id: "security", label: "Security & Privacy", icon: "🔒" },
         { id: "preferences", label: "Preferences", icon: "⚙️" },
@@ -46,22 +53,27 @@ const Sidebar = ({ isOpen, onClose }) => {
           action: "navigate",
           path: "/my-artworks",
         },
-        {
-          id: "browse",
-          label: "Browse Art",
-          icon: "🔍",
-          action: "navigate",
-          path: "/browse",
-        },
       ],
     },
     {
       section: "activity",
       title: "Activity",
       items: [
-        { id: "collections", label: "My Collections", icon: "🎨" },
-        { id: "purchases", label: "Purchase History", icon: "🛒" },
-        { id: "favorites", label: "Favorites", icon: "❤️" },
+        { id: "collections", 
+          label: "My Collections", 
+          icon: "🎨",
+          action: "navigate",
+          path: "/my-artworks",
+        },
+        { id: "purchases", 
+          label: "Purchase History", 
+          icon: "🛒",
+          action: "navigate",
+          path: "/orders"
+          },
+        { id: "favorites", 
+          label: "Favorites", 
+          icon: "❤️" },
       ],
     },
   ];
@@ -75,7 +87,7 @@ const Sidebar = ({ isOpen, onClose }) => {
       ></div>
 
       {/* Sidebar */}
-      <div className={`sidebar ${isOpen ? "sidebar-open" : ""}`}>
+      <div className={`sidebar right-side ${isOpen ? "sidebar-open" : ""}`}>
         <div className="sidebar-header">
           <h2>Account</h2>
           <button className="sidebar-close" onClick={onClose}>
@@ -130,7 +142,7 @@ const Sidebar = ({ isOpen, onClose }) => {
                 style={{ color: "var(--error-color)" }}
                 onClick={handleLogout}
               >
-                <span className="nav-item-icon">🚪</span>
+                <span className="nav-item-icon">⏻</span>
                 Sign Out
               </button>
             </div>

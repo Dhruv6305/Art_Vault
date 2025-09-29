@@ -41,11 +41,7 @@ const Navbar = () => {
     <>
       <header className="main-header">
         <div className="header-left">
-          {isAuthenticated && (
-            <button onClick={toggleSidebar} className="menu-btn" title="Menu">
-              ☰
-            </button>
-          )}
+          {isAuthenticated}
           <div className="logo">
             <Link to="/">ArtVault</Link>
           </div>
@@ -74,9 +70,6 @@ const Navbar = () => {
             {isAuthenticated ? (
               <>
                 <li>
-                  <Link to="/dashboard">Dashboard</Link>
-                </li>
-                <li>
                   <Link to="/orders">Orders</Link>
                 </li>
                 <li>
@@ -87,7 +80,7 @@ const Navbar = () => {
                 </li>
                 <li>
                   <button
-                    onClick={handleProfileClick}
+                    onClick={toggleSidebar}
                     className="profile-btn"
                     title="Profile"
                   >

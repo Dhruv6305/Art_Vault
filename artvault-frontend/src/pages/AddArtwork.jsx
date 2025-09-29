@@ -5,7 +5,6 @@ import api from "../api/axios.js";
 import FileUpload from "../components/ui/FileUpload.jsx";
 import ArtworkForm from "../components/ui/ArtworkForm.jsx";
 import DebugArtwork from "../components/DebugArtwork.jsx";
-import TestFileDisplay from "../components/TestFileDisplay.jsx";
 
 const AddArtwork = () => {
   const navigate = useNavigate();
@@ -33,7 +32,7 @@ const AddArtwork = () => {
     },
     price: {
       amount: "",
-      currency: "USD",
+      currency: "INR",
       negotiable: false,
     },
     quantity: 1,
@@ -268,36 +267,7 @@ const AddArtwork = () => {
   return (
     <div className="add-artwork-page">
       <DebugArtwork />
-      <TestFileDisplay />
-      <div className="add-artwork-container">
-        <div className="add-artwork-header">
-          <h1>Add New Artwork</h1>
-          <div className="step-indicator">
-            <div className={`step ${currentStep >= 1 ? "active" : ""}`}>
-              <span>1</span>
-              <label>Details</label>
-            </div>
-            <div className={`step ${currentStep >= 2 ? "active" : ""}`}>
-              <span>2</span>
-              <label>Media & Pricing</label>
-            </div>
-          </div>
-        </div>
-
-        {successMessage && (
-          <div className="success-message">
-            <span className="success-icon">✅</span>
-            {successMessage}
-          </div>
-        )}
-
-        {errors.general && (
-          <div className="error-message">
-            <span className="error-icon">⚠️</span>
-            {errors.general}
-          </div>
-        )}
-
+      
         <div className="add-artwork-content">
           {currentStep === 1 && (
             <>
@@ -335,10 +305,10 @@ const AddArtwork = () => {
                           onChange={handleInputChange}
                           className="currency-select"
                         >
+                          <option value="INR">🇮🇳 INR</option>
                           <option value="USD">🇺🇸 USD</option>
                           <option value="EUR">🇪🇺 EUR</option>
                           <option value="GBP">🇬🇧 GBP</option>
-                          <option value="INR">🇮🇳 INR</option>
                           <option value="CAD">🇨🇦 CAD</option>
                           <option value="AUD">🇦🇺 AUD</option>
                         </select>
@@ -361,9 +331,9 @@ const AddArtwork = () => {
                         <div className="price-display">
                           {formData.price.amount && (
                             <span className="formatted-price">
-                              {new Intl.NumberFormat("en-US", {
+                              {new Intl.NumberFormat("en-IN", {
                                 style: "currency",
-                                currency: formData.price.currency || "USD",
+                                currency: formData.price.currency || "INR",
                               }).format(formData.price.amount)}
                             </span>
                           )}
@@ -482,7 +452,7 @@ const AddArtwork = () => {
                               })
                             }
                           >
-                            $50 - Starter
+                            ₹50 - Starter
                           </button>
                           <button
                             type="button"
@@ -497,7 +467,7 @@ const AddArtwork = () => {
                               })
                             }
                           >
-                            $150 - Popular
+                            ₹150 - Popular
                           </button>
                           <button
                             type="button"
@@ -512,7 +482,7 @@ const AddArtwork = () => {
                               })
                             }
                           >
-                            $300 - Premium
+                            ₹300 - Premium
                           </button>
                           <button
                             type="button"
@@ -527,7 +497,7 @@ const AddArtwork = () => {
                               })
                             }
                           >
-                            $500+ - Luxury
+                            ₹500+ - Luxury
                           </button>
                         </div>
                         <p className="suggestion-note">
@@ -642,8 +612,7 @@ const AddArtwork = () => {
                       checked={formData.price.negotiable}
                       onChange={handleInputChange}
                     />
-                    <span className="checkmark"></span>
-                    Price is negotiable
+                    Price is negotiable  
                   </label>
                 </div>
 
@@ -655,7 +624,6 @@ const AddArtwork = () => {
                       checked={formData.shipping.available}
                       onChange={handleInputChange}
                     />
-                    <span className="checkmark"></span>
                     Shipping available
                   </label>
                 </div>
@@ -730,7 +698,6 @@ const AddArtwork = () => {
           )}
         </div>
       </div>
-    </div>
   );
 };
 
