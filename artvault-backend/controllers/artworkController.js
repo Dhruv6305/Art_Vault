@@ -334,14 +334,25 @@ exports.uploadFiles = async (req, res) => {
       const relativePath = file.path.replace(/\\/g, "/").replace("src/", "");
       console.log("File path:", file.path, "-> Relative path:", relativePath);
 
-      return {
-        type: file.mimetype.startsWith("image/")
-          ? "image"
-          : file.mimetype.startsWith("video/")
-          ? "video"
-          : file.mimetype.startsWith("audio/")
-          ? "audio"
-          : "document",
+      // Determine file type
+      const fileExtension = path.extname(file.originalname).toLowerCase();
+      const threeDExtensions = ['.fbx', '.obj', '.blend', '.dae', '.3ds', '.ply', '.stl', '.gltf', '.glb', '.x3d', '.ma', '.mb'];
+      
+      let fileType;
+      if (file.mimetype.startsWith("image/")) {
+        fileType = "image";
+      } else if (file.mimetype.startsWith("video/")) {
+        fileType = "video";
+      } else if (file.mimetype.startsWith("audio/")) {
+        fileType = "audio";
+      } else if (threeDExtensions.includes(fileExtension)) {
+        fileType = "3d_model";
+      } else {
+        fileType = "document";
+      }
+
+      const fileData = {
+        type: fileType,
         url: relativePath, // Store relative path without base URL
         localPath: file.path,
         filename: file.originalname,
@@ -349,6 +360,18 @@ exports.uploadFiles = async (req, res) => {
         size: file.size,
         mimetype: file.mimetype,
       };
+
+      // Add 3D model specific properties
+      if (fileType === "3d_model") {
+        fileData.format = fileExtension.replace('.', '');
+        // These would be populated by a 3D model analyzer in a real implementation
+        fileData.vertices = null;
+        fileData.polygons = null;
+        fileData.materials = [];
+        fileData.animations = [];
+      }
+
+      return fileData;
     });
 
     console.log(

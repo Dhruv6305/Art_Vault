@@ -22,6 +22,7 @@ const ArtworkSchema = new mongoose.Schema({
       "digital_art",
       "photography",
       "sculpture",
+      "3d_model",
       "other",
     ],
   },
@@ -49,7 +50,7 @@ const ArtworkSchema = new mongoose.Schema({
     {
       type: {
         type: String,
-        enum: ["image", "video", "audio", "document"],
+        enum: ["image", "video", "audio", "document", "3d_model"],
         required: true,
       },
       url: { type: String, required: true },
@@ -58,6 +59,13 @@ const ArtworkSchema = new mongoose.Schema({
       size: { type: Number }, // in bytes
       duration: { type: Number }, // for audio/video in seconds
       isPrimary: { type: Boolean, default: false },
+      // 3D model specific properties
+      format: { type: String }, // fbx, obj, blend, gltf, etc.
+      vertices: { type: Number }, // vertex count for 3D models
+      polygons: { type: Number }, // polygon count for 3D models
+      materials: [{ type: String }], // material names/types
+      animations: [{ type: String }], // animation names if any
+      thumbnail: { type: String }, // auto-generated thumbnail for 3D models
     },
   ],
   // Folder structure for bulk uploads

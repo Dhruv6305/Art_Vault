@@ -1,0 +1,1146 @@
+/* 3D Viewer Styles */
+.threed-viewer {
+  width: 100%;
+  background: #f8f9fa;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.viewer-container {
+  position: relative;
+  width: 100%;
+  height: 400px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.viewer-controls {
+  padding: 12px 16px;
+  background: white;
+  border-top: 1px solid #e9ecef;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.format-badge {
+  background: #007bff;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.control-hints {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  color: #6c757d;
+}
+
+.control-hints span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.viewer-error {
+  padding: 20px;
+  text-align: center;
+  color: #dc3545;
+  background: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 8px;
+  margin: 10px;
+}
+
+.loading-3d, .error-3d {
+  text-align: center;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 10px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 3D Upload Styles */
+.threed-upload {
+  width: 100%;
+}
+
+.upload-zone {
+  border: 2px dashed #dee2e6;
+  border-radius: 12px;
+  padding: 40px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: #f8f9fa;
+}
+
+.upload-zone:hover {
+  border-color: #007bff;
+  background: #e3f2fd;
+}
+
+.upload-zone.drag-active {
+  border-color: #007bff;
+  background: #e3f2fd;
+  transform: scale(1.02);
+}
+
+.upload-content {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.upload-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.upload-content h3 {
+  margin: 0 0 8px 0;
+  color: #333;
+  font-size: 24px;
+}
+
+.upload-content p {
+  margin: 0 0 16px 0;
+  color: #6c757d;
+  font-size: 16px;
+}
+
+.supported-formats {
+  margin: 16px 0;
+  padding: 16px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.supported-formats strong {
+  display: block;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.format-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+}
+
+.format-tag {
+  background: #e9ecef;
+  color: #495057;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.file-previews {
+  margin-top: 24px;
+}
+
+.file-previews h4 {
+  margin: 0 0 16px 0;
+  color: #333;
+  font-size: 18px;
+}
+
+.preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.preview-item {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+}
+
+.preview-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.preview-header {
+  padding: 12px 16px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.file-name {
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+  flex: 1;
+  margin-right: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.remove-btn {
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.remove-btn:hover {
+  background: #c82333;
+}
+
+.preview-viewer {
+  height: 200px;
+  position: relative;
+}
+
+.preview-3d {
+  height: 100%;
+}
+
+.preview-3d .viewer-container {
+  height: 100%;
+  border-radius: 0;
+}
+
+.preview-placeholder {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  color: #6c757d;
+}
+
+.format-icon {
+  font-size: 48px;
+  margin-bottom: 8px;
+}
+
+.format-info {
+  text-align: center;
+}
+
+.format-info strong {
+  display: block;
+  font-size: 16px;
+  margin-bottom: 4px;
+  color: #495057;
+}
+
+.format-info small {
+  font-size: 12px;
+  color: #6c757d;
+}
+
+.file-info {
+  padding: 12px 16px;
+  background: #f8f9fa;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+  font-size: 12px;
+}
+
+.info-row:last-child {
+  margin-bottom: 0;
+}
+
+.info-row span:first-child {
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.info-row span:last-child {
+  color: #333;
+  font-weight: 600;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .preview-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .control-hints {
+    flex-direction: column;
+    gap: 8px;
+    text-align: center;
+  }
+  
+  .viewer-controls {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .upload-zone {
+    padding: 30px 15px;
+  }
+  
+  .upload-content h3 {
+    font-size: 20px;
+  }
+  
+  .format-list {
+    gap: 4px;
+  }
+  
+  .format-tag {
+    font-size: 10px;
+    padding: 3px 6px;
+  }
+}
+/* 3D Fil
+ters Styles */
+.threed-filters {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.filters-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.filters-header h3 {
+  margin: 0;
+  color: #333;
+  font-size: 18px;
+}
+
+.clear-filters-btn {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.clear-filters-btn:hover {
+  background: #c82333;
+}
+
+.filters-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.filter-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  color: #495057;
+  font-size: 14px;
+}
+
+.label-icon {
+  font-size: 16px;
+}
+
+.filter-select {
+  padding: 8px 12px;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  background: white;
+  font-size: 14px;
+  color: #495057;
+  transition: border-color 0.2s ease;
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.checkbox-item input[type="checkbox"] {
+  margin: 0;
+}
+
+.checkbox-label {
+  color: #495057;
+}
+
+.active-filters {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #e9ecef;
+}
+
+.active-filters h4 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  color: #6c757d;
+  font-weight: 600;
+}
+
+.filter-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.filter-tag {
+  background: #e3f2fd;
+  color: #1976d2;
+  padding: 4px 8px;
+  border-radius: 16px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.filter-tag button {
+  background: none;
+  border: none;
+  color: #1976d2;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 0;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.filter-tag button:hover {
+  background: rgba(25, 118, 210, 0.1);
+}
+
+/* 3D Upload Section in AddArtwork */
+.threed-upload-section {
+  margin: 20px 0;
+}
+
+.artwork-3d-upload {
+  margin-bottom: 24px;
+}
+
+.threed-previews {
+  margin-top: 24px;
+}
+
+.threed-previews h4 {
+  margin: 0 0 16px 0;
+  color: #333;
+  font-size: 18px;
+}
+
+.threed-previews .preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 20px;
+}
+
+.threed-previews .preview-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.threed-previews .preview-header {
+  padding: 12px 16px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.threed-previews .file-name {
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+  flex: 1;
+  margin-right: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.threed-previews .file-format {
+  background: #007bff;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.threed-previews .preview-viewer {
+  height: 250px;
+}
+
+.threed-previews .preview-placeholder {
+  height: 250px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  color: #6c757d;
+}
+
+.threed-previews .format-icon {
+  font-size: 48px;
+  margin-bottom: 8px;
+}
+
+/* Upload Mode Selector Enhancement */
+.upload-mode-selector .mode-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.upload-mode-selector .mode-btn {
+  padding: 12px 20px;
+  border: 2px solid #e9ecef;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.upload-mode-selector .mode-btn:hover {
+  border-color: #007bff;
+  background: #f8f9fa;
+}
+
+.upload-mode-selector .mode-btn.active {
+  border-color: #007bff;
+  background: #007bff;
+  color: white;
+}
+
+/* Responsive Design for 3D Components */
+@media (max-width: 768px) {
+  .filters-content {
+    grid-template-columns: 1fr;
+  }
+  
+  .threed-previews .preview-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .upload-mode-selector .mode-buttons {
+    flex-direction: column;
+  }
+  
+  .upload-mode-selector .mode-btn {
+    justify-content: center;
+  }
+  
+  .filter-tags {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}/* 3D 
+Model Card Styles */
+.artwork-3d-preview {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.card-3d-viewer {
+  height: 100%;
+}
+
+.card-3d-viewer .viewer-container {
+  height: 100%;
+  border-radius: 8px;
+}
+
+.threed-overlay {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-end;
+}
+
+.threed-badge {
+  background: rgba(0, 123, 255, 0.9);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  backdrop-filter: blur(4px);
+}
+
+.polygon-count {
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 2px 6px;
+  border-radius: 8px;
+  font-size: 10px;
+  backdrop-filter: blur(4px);
+}
+
+.artwork-3d-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 8px;
+  color: #6c757d;
+  text-align: center;
+  padding: 20px;
+}
+
+.threed-icon {
+  font-size: 48px;
+  margin-bottom: 8px;
+}
+
+.threed-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+}
+
+.threed-format {
+  font-weight: 600;
+  font-size: 14px;
+  color: #495057;
+}
+
+.material-count {
+  font-size: 11px;
+  color: #6c757d;
+}
+
+/* 3D Model specific artwork card enhancements */
+.artwork-card[data-category="3d_model"] {
+  border: 2px solid transparent;
+  background: linear-gradient(white, white) padding-box,
+              linear-gradient(135deg, #667eea, #764ba2) border-box;
+}
+
+.artwork-card[data-category="3d_model"]:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+}
+
+.artwork-card[data-category="3d_model"] .category-badge {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+}
+
+/* Enhanced 3D viewer for cards */
+.card-3d-viewer .viewer-controls {
+  display: none;
+}
+
+.card-3d-viewer canvas {
+  cursor: pointer;
+}
+
+/* Loading state for 3D models */
+.threed-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.threed-loading .spinner {
+  width: 30px;
+  height: 30px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 8px;
+}
+
+.threed-loading p {
+  margin: 0;
+  font-size: 12px;
+  color: #6c757d;
+}
+
+/* 3D Model detail view enhancements */
+.artwork-detail[data-category="3d_model"] .artwork-image-container {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.artwork-detail[data-category="3d_model"] .threed-viewer {
+  height: 500px;
+}
+
+/* Mobile responsiveness for 3D cards */
+@media (max-width: 768px) {
+  .artwork-3d-preview {
+    height: 180px;
+  }
+  
+  .artwork-3d-placeholder {
+    height: 180px;
+    padding: 15px;
+  }
+  
+  .threed-icon {
+    font-size: 36px;
+  }
+  
+  .threed-overlay {
+    top: 6px;
+    right: 6px;
+  }
+  
+  .threed-badge {
+    font-size: 10px;
+    padding: 3px 6px;
+  }
+  
+  .polygon-count {
+    font-size: 9px;
+    padding: 2px 4px;
+  }
+}/*
+ Folder Upload Styles */
+.folder-upload {
+  width: 100%;
+  margin: 20px 0;
+}
+
+.folder-upload .upload-zone {
+  border: 2px dashed #dee2e6;
+  border-radius: 12px;
+  padding: 40px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: #f8f9fa;
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.folder-upload .upload-zone:hover:not(.disabled) {
+  border-color: #007bff;
+  background: #e3f2fd;
+}
+
+.folder-upload .upload-zone.drag-active {
+  border-color: #007bff;
+  background: #e3f2fd;
+  transform: scale(1.02);
+}
+
+.folder-upload .upload-zone.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.folder-upload .upload-content {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.folder-upload .upload-icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+}
+
+.folder-upload .upload-content h3 {
+  margin: 0 0 8px 0;
+  color: #333;
+  font-size: 24px;
+}
+
+.folder-upload .upload-content p {
+  margin: 0 0 20px 0;
+  color: #6c757d;
+  font-size: 16px;
+}
+
+.folder-upload .upload-features {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 20px 0;
+  padding: 16px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.folder-upload .feature {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #495057;
+}
+
+.folder-upload .feature-icon {
+  font-size: 16px;
+}
+
+.folder-upload .upload-progress {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.folder-upload .progress-icon {
+  font-size: 48px;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.folder-upload .progress-bar {
+  width: 100%;
+  max-width: 300px;
+  height: 8px;
+  background: #e9ecef;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.folder-upload .progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #007bff, #0056b3);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.folder-upload .upload-error {
+  margin-top: 16px;
+  padding: 12px 16px;
+  background: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 8px;
+  color: #721c24;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.folder-upload .error-icon {
+  font-size: 16px;
+}
+
+.folder-upload .upload-info {
+  margin-top: 24px;
+  padding: 20px;
+  background: #e3f2fd;
+  border-radius: 8px;
+  border-left: 4px solid #007bff;
+}
+
+.folder-upload .upload-info h4 {
+  margin: 0 0 12px 0;
+  color: #1976d2;
+  font-size: 16px;
+}
+
+.folder-upload .upload-info ul {
+  margin: 0;
+  padding-left: 20px;
+  color: #1565c0;
+}
+
+.folder-upload .upload-info li {
+  margin-bottom: 4px;
+  font-size: 14px;
+}
+
+/* Mobile responsiveness for folder upload */
+@media (max-width: 768px) {
+  .folder-upload .upload-zone {
+    padding: 30px 15px;
+    min-height: 180px;
+  }
+  
+  .folder-upload .upload-icon {
+    font-size: 48px;
+  }
+  
+  .folder-upload .upload-content h3 {
+    font-size: 20px;
+  }
+  
+  .folder-upload .upload-features {
+    margin: 16px 0;
+    padding: 12px;
+  }
+  
+  .folder-upload .feature {
+    font-size: 13px;
+  }
+  
+  .folder-upload .upload-info {
+    padding: 16px;
+  }
+}/* 
+Simple 3D Viewer Styles (fallback for Three.js issues) */
+.simple-3d-viewer {
+  width: 100%;
+  background: #f8f9fa;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.simple-3d-viewer .viewer-container {
+  position: relative;
+  width: 100%;
+  height: 400px;
+}
+
+.simple-3d-viewer .model-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.simple-3d-viewer .model-placeholder::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(180deg); }
+}
+
+.simple-3d-viewer .model-icon {
+  margin-bottom: 16px;
+  animation: float 3s ease-in-out infinite;
+  z-index: 1;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+.simple-3d-viewer .model-info {
+  z-index: 1;
+}
+
+.simple-3d-viewer .model-info h3 {
+  margin: 0 0 8px 0;
+  color: #333;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.simple-3d-viewer .model-info p {
+  margin: 0 0 12px 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.simple-3d-viewer .rotation-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #888;
+  font-size: 12px;
+}
+
+.simple-3d-viewer .rotating-icon {
+  animation: spin 2s linear infinite;
+}
+
+.simple-3d-viewer .model-actions {
+  margin-top: 16px;
+  z-index: 1;
+}
+
+.simple-3d-viewer .preview-btn {
+  background: rgba(0, 123, 255, 0.9);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(4px);
+}
+
+.simple-3d-viewer .preview-btn:hover {
+  background: rgba(0, 123, 255, 1);
+  transform: translateY(-2px);
+}
+
+.simple-3d-viewer .viewer-controls {
+  padding: 12px 16px;
+  background: white;
+  border-top: 1px solid #e9ecef;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.simple-3d-viewer .format-badge {
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.simple-3d-viewer .control-hints {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  color: #6c757d;
+}
+
+.simple-3d-viewer .control-hints span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Responsive design for simple viewer */
+@media (max-width: 768px) {
+  .simple-3d-viewer .viewer-container {
+    height: 300px;
+  }
+  
+  .simple-3d-viewer .model-icon {
+    font-size: 36px;
+  }
+  
+  .simple-3d-viewer .model-info h3 {
+    font-size: 18px;
+  }
+  
+  .simple-3d-viewer .control-hints {
+    flex-direction: column;
+    gap: 8px;
+    text-align: center;
+  }
+  
+  .simple-3d-viewer .viewer-controls {
+    flex-direction: column;
+    align-items: center;
+  }
+}

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext.jsx";
 import api from "../../api/axios.js";
+import Simple3DViewer from "../3d/Simple3DViewer.jsx";
 
 const ArtworkCard = ({ artwork, showActions = true }) => {
   const { user } = useAuth();
@@ -124,6 +125,31 @@ const ArtworkCard = ({ artwork, showActions = true }) => {
             />
           </div>
         );
+      case "3d_model":
+        const format = file.format || file.filename?.split('.').pop()?.toLowerCase();
+        const isViewable = ['gltf', 'glb'].includes(format);
+        
+        return (
+          <div className="artwork-3d-preview">
+            <Simple3DViewer
+              fileUrl={fileUrl}
+              format={format}
+              className="card-3d-viewer"
+              showControls={false}
+              autoRotate={true}
+            />
+            {(file.polygons || file.materials) && (
+              <div className="threed-overlay">
+                {file.polygons && (
+                  <span className="polygon-count">{file.polygons.toLocaleString()} polys</span>
+                )}
+                {file.materials && file.materials.length > 0 && (
+                  <span className="material-count">{file.materials.length} materials</span>
+                )}
+              </div>
+            )}
+          </div>
+        );
       default:
         return (
           <div className="artwork-document-preview">
@@ -142,6 +168,8 @@ const ArtworkCard = ({ artwork, showActions = true }) => {
         return "📸";
       case "digital_art":
         return "💻";
+      case "3d_model":
+        return "🎲";
       case "sculpture":
         return "🗿";
       case "music":

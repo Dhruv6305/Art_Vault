@@ -273,7 +273,7 @@ const PaymentDebugger = () => {
           </li>
           <li>
             <strong>Missing Artwork:</strong> Ensure there are artworks with
-            quantity > 0
+            quantity {">"} 0
           </li>
           <li>
             <strong>Database Connection:</strong> Verify MongoDB is running and

@@ -3,8 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import api from "../api/axios.js";
 import FileUpload from "../components/ui/FileUpload.jsx";
+import FolderUpload from "../components/ui/FolderUpload.jsx";
 import ArtworkForm from "../components/ui/ArtworkForm.jsx";
 import DebugArtwork from "../components/DebugArtwork.jsx";
+import ThreeDUpload from "../components/3d/ThreeDUpload.jsx";
+import Simple3DViewer from "../components/3d/Simple3DViewer.jsx";
 
 const AddArtwork = () => {
   const navigate = useNavigate();
@@ -86,6 +89,19 @@ const AddArtwork = () => {
         "Concept Art",
         "Graphic Design",
         "NFT",
+      ],
+    },
+    "3d_model": {
+      label: "3D Models",
+      subcategories: [
+        "Characters",
+        "Environments",
+        "Props",
+        "Vehicles",
+        "Architecture",
+        "Abstract",
+        "Game Assets",
+        "Printable Models",
       ],
     },
     sculpture: {
@@ -524,7 +540,16 @@ const AddArtwork = () => {
                     }`}
                     onClick={() => setUploadMode("files")}
                   >
-                    Individual Files
+                    📁 Individual Files
+                  </button>
+                  <button
+                    type="button"
+                    className={`mode-btn ${
+                      uploadMode === "3d" ? "active" : ""
+                    }`}
+                    onClick={() => setUploadMode("3d")}
+                  >
+                    🎲 3D Models
                   </button>
                   <button
                     type="button"
@@ -533,7 +558,7 @@ const AddArtwork = () => {
                     }`}
                     onClick={() => setUploadMode("folder")}
                   >
-                    Entire Folder
+                    📂 Entire Folder
                   </button>
                 </div>
               </div>
@@ -544,6 +569,44 @@ const AddArtwork = () => {
                   onChange={handleFilesChange}
                   error={errors.files}
                 />
+              ) : uploadMode === "3d" ? (
+                <div className="threed-upload-section">
+                  <ThreeDUpload
+                    onFilesSelected={handleFilesChange}
+                    maxFiles={5}
+                    className="artwork-3d-upload"
+                  />
+                  
+                  {/* Show 3D previews */}
+                  {formData.files.length > 0 && (
+                    <div className="threed-previews">
+                      <h4>3D Model Previews</h4>
+                      <div className="preview-grid">
+                        {formData.files.map((file, index) => {
+                          const fileExtension = file.name?.split('.').pop()?.toLowerCase();
+                          const isViewable = ['gltf', 'glb'].includes(fileExtension);
+                          
+                          return (
+                            <div key={index} className="preview-card">
+                              <div className="preview-header">
+                                <span className="file-name">{file.name}</span>
+                                <span className="file-format">{fileExtension?.toUpperCase()}</span>
+                              </div>
+                              
+                              <Simple3DViewer
+                                fileUrl={URL.createObjectURL(file)}
+                                format={fileExtension}
+                                className="preview-viewer"
+                                showControls={true}
+                                autoRotate={true}
+                              />
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
               ) : (
                 <FolderUpload
                   onFolderUploaded={handleFolderUploaded}

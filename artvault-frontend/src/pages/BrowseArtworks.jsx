@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import api from "../api/axios.js";
 import ArtworkCard from "../components/ui/ArtworkCard.jsx";
+import ThreeDFilters from "../components/filters/ThreeDFilters.jsx";
 
 const BrowseArtworks = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -25,6 +26,7 @@ const BrowseArtworks = () => {
     visual_art: "Visual Art",
     photography: "Photography",
     digital_art: "Digital Art",
+    "3d_model": "3D Models",
     sculpture: "Sculpture",
     music: "Music",
     video: "Video",
