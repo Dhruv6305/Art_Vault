@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext.jsx";
 import api from "../../api/axios.js";
-import Simple3DViewer from "../3d/Simple3DViewer.jsx";
+import Standard3DCanvas from "../3d/Standard3DCanvas.jsx";
+import ThreeDModelModal from "../3d/ThreeDModelModal.jsx";
 
 const ArtworkCard = ({ artwork, showActions = true }) => {
   const { user } = useAuth();
@@ -11,6 +12,7 @@ const ArtworkCard = ({ artwork, showActions = true }) => {
   );
   const [likesCount, setLikesCount] = useState(artwork.likes?.length || 0);
   const [loading, setLoading] = useState(false);
+  const [showThreeDModal, setShowThreeDModal] = useState(false);
 
   const primaryFile =
     artwork.files?.find((file) => file.isPrimary) || artwork.files?.[0];
@@ -78,6 +80,40 @@ const ArtworkCard = ({ artwork, showActions = true }) => {
 
     console.log("File preview URL:", fileUrl);
 
+    // Check if it's a 3D model by file type OR file extension
+    const is3DModel =
+      file.type === "3d_model" ||
+      artwork.category === "3d_model" ||
+      (file.filename &&
+        /\.(gltf|glb|obj|fbx|stl|blend|dae|3ds|ply)$/i.test(file.filename));
+
+    if (is3DModel) {
+      return (
+        <div className="artwork-3d-preview">
+          <Standard3DCanvas
+            fileUrl={fileUrl}
+            fileName={file.filename}
+            width={300}
+            height={200}
+            showControls={true}
+            autoRotate={false}
+            backgroundColor="#1a1a1a"
+            showInfo={true}
+            preventDownload={true}
+            onModelClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setShowThreeDModal(true);
+            }}
+            style={{
+              cursor: "grab",
+              transition: "transform 0.2s ease",
+            }}
+          />
+        </div>
+      );
+    }
+
     switch (file.type) {
       case "image":
         return (
@@ -125,31 +161,6 @@ const ArtworkCard = ({ artwork, showActions = true }) => {
             />
           </div>
         );
-      case "3d_model":
-        const format = file.format || file.filename?.split('.').pop()?.toLowerCase();
-        const isViewable = ['gltf', 'glb'].includes(format);
-        
-        return (
-          <div className="artwork-3d-preview">
-            <Simple3DViewer
-              fileUrl={fileUrl}
-              format={format}
-              className="card-3d-viewer"
-              showControls={false}
-              autoRotate={true}
-            />
-            {(file.polygons || file.materials) && (
-              <div className="threed-overlay">
-                {file.polygons && (
-                  <span className="polygon-count">{file.polygons.toLocaleString()} polys</span>
-                )}
-                {file.materials && file.materials.length > 0 && (
-                  <span className="material-count">{file.materials.length} materials</span>
-                )}
-              </div>
-            )}
-          </div>
-        );
       default:
         return (
           <div className="artwork-document-preview">
@@ -182,88 +193,114 @@ const ArtworkCard = ({ artwork, showActions = true }) => {
   };
 
   return (
-    <div className="artwork-card">
-      <Link to={`/artwork/${artwork._id}`} className="artwork-link">
-        <div className="artwork-preview">
-          {primaryFile ? (
-            getFilePreview(primaryFile)
-          ) : (
-            <div className="no-preview">
-              <span className="no-preview-icon">
-                {getCategoryIcon(artwork.category)}
-              </span>
-              <span className="no-preview-text">No Preview</span>
-            </div>
-          )}
+    <>
+      <div className="artwork-card">
+        <Link to={`/artwork/${artwork._id}`} className="artwork-link">
+          <div className="artwork-preview">
+            {primaryFile ? (
+              getFilePreview(primaryFile)
+            ) : (
+              <div className="no-preview">
+                <span className="no-preview-icon">
+                  {getCategoryIcon(artwork.category)}
+                </span>
+                <span className="no-preview-text">No Preview</span>
+              </div>
+            )}
 
-          <div className="artwork-overlay">
-            <div className="artwork-category">
-              {getCategoryIcon(artwork.category)} {artwork.subcategory}
+            <div className="artwork-overlay">
+              <div className="artwork-category">
+                {getCategoryIcon(artwork.category)} {artwork.subcategory}
+              </div>
+
+              {showActions && (
+                <button
+                  onClick={handleLike}
+                  className={`like-btn ${liked ? "liked" : ""}`}
+                  disabled={loading}
+                >
+                  {liked ? "❤️" : "🤍"} {likesCount}
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="artwork-info">
+            <h3 className="artwork-title">{artwork.title}</h3>
+            <p className="artwork-artist">by {artwork.artistName}</p>
+
+            <div className="artwork-details">
+              <span className="artwork-medium">{artwork.medium}</span>
+              {artwork.yearCreated && (
+                <span className="artwork-year">• {artwork.yearCreated}</span>
+              )}
             </div>
 
-            {showActions && (
-              <button
-                onClick={handleLike}
-                className={`like-btn ${liked ? "liked" : ""}`}
-                disabled={loading}
-              >
-                {liked ? "❤️" : "🤍"} {likesCount}
-              </button>
+            <div className="artwork-footer">
+              <div className="artwork-price">
+                <span className="price-amount">
+                  {formatPrice(artwork.price)}
+                </span>
+                {artwork.price.negotiable && (
+                  <span className="price-negotiable">Negotiable</span>
+                )}
+              </div>
+
+              <div className="artwork-stats">
+                <span className="views">👁️ {artwork.views}</span>
+                {artwork.quantity > 1 && (
+                  <span className="quantity-info">
+                    📦 {artwork.quantity} available
+                  </span>
+                )}
+                {artwork.folderStructure?.isFolder ? (
+                  <span className="folder-info">
+                    📁 {artwork.folderStructure.totalFiles} files
+                  </span>
+                ) : artwork.files?.length > 1 ? (
+                  <span className="file-count">📁 {artwork.files.length}</span>
+                ) : null}
+              </div>
+            </div>
+
+            {artwork.tags && artwork.tags.length > 0 && (
+              <div className="artwork-tags">
+                {artwork.tags.slice(0, 3).map((tag, index) => (
+                  <span key={index} className="tag">
+                    #{tag}
+                  </span>
+                ))}
+                {artwork.tags.length > 3 && (
+                  <span className="tag-more">+{artwork.tags.length - 3}</span>
+                )}
+              </div>
             )}
           </div>
-        </div>
+        </Link>
+      </div>
 
-        <div className="artwork-info">
-          <h3 className="artwork-title">{artwork.title}</h3>
-          <p className="artwork-artist">by {artwork.artistName}</p>
-
-          <div className="artwork-details">
-            <span className="artwork-medium">{artwork.medium}</span>
-            {artwork.yearCreated && (
-              <span className="artwork-year">• {artwork.yearCreated}</span>
-            )}
-          </div>
-
-          <div className="artwork-footer">
-            <div className="artwork-price">
-              <span className="price-amount">{formatPrice(artwork.price)}</span>
-              {artwork.price.negotiable && (
-                <span className="price-negotiable">Negotiable</span>
-              )}
-            </div>
-
-            <div className="artwork-stats">
-              <span className="views">👁️ {artwork.views}</span>
-              {artwork.quantity > 1 && (
-                <span className="quantity-info">
-                  📦 {artwork.quantity} available
-                </span>
-              )}
-              {artwork.folderStructure?.isFolder ? (
-                <span className="folder-info">
-                  📁 {artwork.folderStructure.totalFiles} files
-                </span>
-              ) : artwork.files?.length > 1 ? (
-                <span className="file-count">📁 {artwork.files.length}</span>
-              ) : null}
-            </div>
-          </div>
-
-          {artwork.tags && artwork.tags.length > 0 && (
-            <div className="artwork-tags">
-              {artwork.tags.slice(0, 3).map((tag, index) => (
-                <span key={index} className="tag">
-                  #{tag}
-                </span>
-              ))}
-              {artwork.tags.length > 3 && (
-                <span className="tag-more">+{artwork.tags.length - 3}</span>
-              )}
-            </div>
-          )}
-        </div>
-      </Link>
-    </div>
+      {/* 3D Model Modal */}
+      <ThreeDModelModal
+        isOpen={showThreeDModal}
+        onClose={() => setShowThreeDModal(false)}
+        fileUrl={
+          primaryFile &&
+          (primaryFile.type === "3d_model" ||
+            artwork.category === "3d_model" ||
+            (primaryFile.filename &&
+              /\.(gltf|glb|obj|fbx|stl|blend|dae|3ds|ply)$/i.test(
+                primaryFile.filename
+              )))
+            ? primaryFile.url.startsWith("http")
+              ? primaryFile.url
+              : `http://localhost:5000/${primaryFile.url}`
+            : null
+        }
+        fileName={primaryFile?.filename}
+        artworkTitle={artwork.title}
+        artworkArtist={artwork.artistName}
+      />
+    </>
   );
 };
 

@@ -23,6 +23,7 @@ import SystemStatusChecker from "./components/SystemStatusChecker.jsx";
 import Orders from "./pages/Orders.jsx";
 import OrderDetails from "./pages/OrderDetails.jsx";
 import Test3D from "./pages/Test3D.jsx";
+import TestFBX from "./pages/TestFBX.jsx";
 import ToastContainer from "./components/ui/ToastContainer.jsx";
 import { useToast } from "./hooks/useToast.js";
 
@@ -92,6 +93,7 @@ function App() {
             <Route path="/orders" element={<Orders />} />
             <Route path="/orders/:id" element={<OrderDetails />} />
             <Route path="/test-3d" element={<Test3D />} />
+            <Route path="/test-fbx" element={<TestFBX />} />
             <Route path="/auth/success" element={<AuthSuccess />} />
           </Routes>
         </main>

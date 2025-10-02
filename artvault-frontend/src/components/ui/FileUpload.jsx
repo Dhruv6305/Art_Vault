@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react";
 import api from "../../api/axios.js";
+import Standard3DCanvas from "../3d/Standard3DCanvas.jsx";
 
 const FileUpload = ({ files, onChange, error }) => {
   const [uploading, setUploading] = useState(false);
@@ -11,15 +12,60 @@ const FileUpload = ({ files, onChange, error }) => {
     video: ["video/mp4", "video/avi", "video/mov", "video/wmv", "video/webm"],
     audio: ["audio/mp3", "audio/wav", "audio/ogg", "audio/m4a", "audio/mpeg"],
     document: ["application/pdf"],
+    "3d_model": [
+      "application/octet-stream", // For .fbx, .obj, .blend, etc.
+      "model/gltf+json", // For .gltf
+      "model/gltf-binary", // For .glb
+      "application/x-tgif", // Sometimes used for 3D files
+    ],
   };
 
   const maxFileSize = 100 * 1024 * 1024; // 100MB
 
   const validateFile = (file) => {
-    const allAcceptedTypes = Object.values(acceptedTypes).flat();
+    const fileType = getFileType(file);
+    const fileName = file.name.toLowerCase();
 
-    if (!allAcceptedTypes.includes(file.type)) {
-      return `File type ${file.type} is not supported`;
+    // Check if file type is supported
+    const supportedExtensions = [
+      // Images
+      ".jpg",
+      ".jpeg",
+      ".png",
+      ".gif",
+      ".webp",
+      // Videos
+      ".mp4",
+      ".avi",
+      ".mov",
+      ".wmv",
+      ".webm",
+      // Audio
+      ".mp3",
+      ".wav",
+      ".ogg",
+      ".m4a",
+      // Documents
+      ".pdf",
+      // 3D Models
+      ".fbx",
+      ".obj",
+      ".blend",
+      ".dae",
+      ".3ds",
+      ".ply",
+      ".stl",
+      ".gltf",
+      ".glb",
+      ".x3d",
+      ".ma",
+      ".mb",
+    ];
+
+    const extension = "." + fileName.split(".").pop();
+
+    if (!supportedExtensions.includes(extension)) {
+      return `File type ${extension} is not supported`;
     }
 
     if (file.size > maxFileSize) {
@@ -29,10 +75,37 @@ const FileUpload = ({ files, onChange, error }) => {
     return null;
   };
 
-  const getFileType = (mimeType) => {
+  const getFileType = (file) => {
+    const mimeType = file.type;
+    const fileName = file.name.toLowerCase();
+
+    // Check by MIME type first
     if (mimeType.startsWith("image/")) return "image";
     if (mimeType.startsWith("video/")) return "video";
     if (mimeType.startsWith("audio/")) return "audio";
+    if (mimeType === "application/pdf") return "document";
+
+    // Check by file extension for 3D models
+    const threeDExtensions = [
+      ".fbx",
+      ".obj",
+      ".blend",
+      ".dae",
+      ".3ds",
+      ".ply",
+      ".stl",
+      ".gltf",
+      ".glb",
+      ".x3d",
+      ".ma",
+      ".mb",
+    ];
+    const extension = "." + fileName.split(".").pop();
+
+    if (threeDExtensions.includes(extension)) {
+      return "3d_model";
+    }
+
     return "document";
   };
 
@@ -146,6 +219,8 @@ const FileUpload = ({ files, onChange, error }) => {
         return "🎥";
       case "audio":
         return "🎵";
+      case "3d_model":
+        return "🎲";
       case "document":
         return "📄";
       default:
@@ -171,7 +246,7 @@ const FileUpload = ({ files, onChange, error }) => {
           ref={fileInputRef}
           type="file"
           multiple
-          accept="image/*,video/*,audio/*,.pdf"
+          accept="image/*,video/*,audio/*,.pdf,.fbx,.obj,.blend,.dae,.3ds,.ply,.stl,.gltf,.glb,.x3d,.ma,.mb"
           onChange={handleFileSelect}
           style={{ display: "none" }}
         />
@@ -188,7 +263,8 @@ const FileUpload = ({ files, onChange, error }) => {
               <h4>Drop files here or click to browse</h4>
               <p>
                 Supported formats: Images (JPG, PNG, GIF, WebP), Videos (MP4,
-                AVI, MOV, WebM), Audio (MP3, WAV, OGG, M4A), Documents (PDF)
+                AVI, MOV, WebM), Audio (MP3, WAV, OGG, M4A), 3D Models (FBX,
+                OBJ, GLTF, GLB, STL, BLEND), Documents (PDF)
               </p>
               <p className="file-limit">Maximum file size: 100MB</p>
             </>
@@ -210,6 +286,21 @@ const FileUpload = ({ files, onChange, error }) => {
                 <div className="file-preview">
                   {file.type === "image" && file.preview ? (
                     <img src={file.preview} alt={file.filename} />
+                  ) : file.type === "3d_model" ? (
+                    <div className="threed-preview-container">
+                      <Standard3DCanvas
+                        fileUrl={
+                          file.url.startsWith("http")
+                            ? file.url
+                            : `http://localhost:5000/${file.url}`
+                        }
+                        fileName={file.filename}
+                        canvasSize="preview"
+                        showControls={false}
+                        autoRotate={true}
+                        backgroundColor="#1a1a1a"
+                      />
+                    </div>
                   ) : (
                     <div className="file-icon">{getFileIcon(file.type)}</div>
                   )}

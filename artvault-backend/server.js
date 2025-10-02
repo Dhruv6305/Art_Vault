@@ -89,7 +89,7 @@ app.get("/", (req, res) => {
 // Test endpoint to check file serving
 app.get("/test-files", (req, res) => {
   const fs = require("fs");
-  const uploadsPath = path.join(__dirname, "src/uploads");
+  const uploadsPath = path.join(__dirname, "uploads");
 
   try {
     const checkDirectory = (dir) => {
@@ -127,13 +127,13 @@ app.use("/api/notifications", require("./routes/notifications"));
 // Add logging middleware for file requests (before static serving)
 app.use("/uploads", (req, res, next) => {
   console.log("File request:", req.url);
-  const fullPath = path.join(__dirname, "src/uploads", req.url);
+  const fullPath = path.join(__dirname, "uploads", req.url);
   console.log("Looking for file at:", fullPath);
   next();
 });
 
 // Serve uploaded files statically
-app.use("/uploads", express.static(path.join(__dirname, "src/uploads")));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));

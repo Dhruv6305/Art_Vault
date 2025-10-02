@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import PaymentModal from "../components/payment/PaymentModal.jsx";
+import Standard3DCanvas from "../components/3d/Standard3DCanvas.jsx";
+import ThreeDModelModal from "../components/3d/ThreeDModelModal.jsx";
 import api from "../api/axios.js";
 
 const ArtworkDetail = () => {
@@ -16,10 +18,27 @@ const ArtworkDetail = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [currentQuantity, setCurrentQuantity] = useState(null);
+  const [showThreeDModal, setShowThreeDModal] = useState(false);
+  const [windowDimensions, setWindowDimensions] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  });
 
   useEffect(() => {
     fetchArtwork();
   }, [id]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowDimensions({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const fetchArtwork = async () => {
     try {
@@ -94,6 +113,40 @@ const ArtworkDetail = () => {
 
     console.log("Detail file URL:", fileUrl);
 
+    // Check if it's a 3D model by file type OR file extension OR artwork category
+    const is3DModel =
+      file.type === "3d_model" ||
+      artwork.category === "3d_model" ||
+      (file.filename &&
+        /\.(gltf|glb|obj|fbx|stl|blend|dae|3ds|ply)$/i.test(file.filename));
+
+    if (is3DModel) {
+      return (
+        <div key={index} className="artwork-detail-3d">
+          <Standard3DCanvas
+            fileUrl={fileUrl}
+            fileName={file.filename}
+            width={400}
+            height={300}
+            showControls={true}
+            autoRotate={false}
+            backgroundColor="#1a1a1a"
+            showInfo={true}
+            preventDownload={true}
+            onModelClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setShowThreeDModal(true);
+            }}
+            style={{
+              cursor: "grab",
+              borderRadius: "8px",
+            }}
+          />
+        </div>
+      );
+    }
+
     switch (file.type) {
       case "image":
         return (
@@ -155,10 +208,31 @@ const ArtworkDetail = () => {
   if (error) return <div className="error">Error: {error}</div>;
   if (!artwork) return <div className="error">Artwork not found</div>;
 
+  // Separate files by type
   const imageFiles =
     artwork.files?.filter((file) => file.type === "image") || [];
+  const threeDFiles =
+    artwork.files?.filter(
+      (file) =>
+        file.type === "3d_model" ||
+        artwork.category === "3d_model" ||
+        (file.filename &&
+          /\.(gltf|glb|obj|fbx|stl|blend|dae|3ds|ply)$/i.test(file.filename))
+    ) || [];
   const otherFiles =
-    artwork.files?.filter((file) => file.type !== "image") || [];
+    artwork.files?.filter(
+      (file) =>
+        file.type !== "image" &&
+        file.type !== "3d_model" &&
+        !(
+          file.filename &&
+          /\.(gltf|glb|obj|fbx|stl|blend|dae|3ds|ply)$/i.test(file.filename)
+        )
+    ) || [];
+
+  // Get primary file for 3D modal
+  const primary3DFile =
+    threeDFiles.find((file) => file.isPrimary) || threeDFiles[0];
 
   return (
     <div className="artwork-detail-container">
@@ -168,7 +242,59 @@ const ArtworkDetail = () => {
 
       <div className="artwork-detail-content">
         <div className="artwork-media-section">
-          {imageFiles.length > 0 && (
+          {/* 3D Model Display - Takes priority and 1/4+ of screen */}
+          {threeDFiles.length > 0 && (
+            <div className="main-3d-container">
+              {/* All 3D Models - Same Size Grid */}
+              <div className="all-3d-models-grid">
+                <h4>3D Models ({threeDFiles.length})</h4>
+                <div className="models-grid">
+                  {threeDFiles.map((file, index) => (
+                    <div key={index} className="model-item">
+                      <Standard3DCanvas
+                        fileUrl={
+                          file.url.startsWith("http")
+                            ? file.url
+                            : `http://localhost:5000/${file.url}`
+                        }
+                        fileName={file.filename}
+                        width={Math.max(windowDimensions.width * 0.5, 640)} // 1/2 of screen width, minimum 640px
+                        height={Math.max(windowDimensions.height * 0.25, 240)} // 1/4 of screen height, minimum 240px
+                        showControls={true}
+                        autoRotate={index > 0} // Auto-rotate for non-primary models
+                        backgroundColor="#1a1a1a"
+                        showInfo={true}
+                        preventDownload={true}
+                        onModelClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setShowThreeDModal(true);
+                        }}
+                        style={{
+                          cursor: "grab",
+                          borderRadius: "12px",
+                          boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
+                          border:
+                            index === 0
+                              ? "2px solid #4ecdc4"
+                              : "2px solid #333",
+                        }}
+                      />
+                      <div className="model-info">
+                        <span className="model-filename">{file.filename}</span>
+                        {index === 0 && (
+                          <span className="primary-badge">Primary</span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Image Display - Only if no 3D models */}
+          {threeDFiles.length === 0 && imageFiles.length > 0 && (
             <div className="main-image-container">
               <img
                 src={
@@ -213,6 +339,36 @@ const ArtworkDetail = () => {
             </div>
           )}
 
+          {/* Additional Images - Show as thumbnails if 3D model is primary */}
+          {threeDFiles.length > 0 && imageFiles.length > 0 && (
+            <div className="additional-images-section">
+              <h4>Reference Images</h4>
+              <div className="reference-images-grid">
+                {imageFiles.map((file, index) => (
+                  <img
+                    key={index}
+                    src={
+                      file.url.startsWith("http")
+                        ? file.url
+                        : `http://localhost:5000/${file.url}`
+                    }
+                    alt={`${artwork.title} reference ${index + 1}`}
+                    className="reference-image"
+                    onClick={() => setCurrentImageIndex(index)}
+                    onError={(e) => {
+                      console.error(
+                        "Reference image failed to load:",
+                        e.target.src
+                      );
+                      e.target.style.opacity = "0.3";
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Other Files */}
           {otherFiles.length > 0 && (
             <div className="other-files-section">
               <h3>Additional Files</h3>
@@ -385,6 +541,22 @@ const ArtworkDetail = () => {
           setCurrentQuantity(remainingQuantity);
           setShowPaymentModal(false);
         }}
+      />
+
+      {/* 3D Model Modal */}
+      <ThreeDModelModal
+        isOpen={showThreeDModal}
+        onClose={() => setShowThreeDModal(false)}
+        fileUrl={
+          primary3DFile
+            ? primary3DFile.url.startsWith("http")
+              ? primary3DFile.url
+              : `http://localhost:5000/${primary3DFile.url}`
+            : null
+        }
+        fileName={primary3DFile?.filename}
+        artworkTitle={artwork.title}
+        artworkArtist={artwork.artistName}
       />
     </div>
   );

@@ -17,15 +17,30 @@ const {
 const authMiddleware = require("../middleware/authMiddleware");
 
 // Configure multer for file uploads
+const fs = require("fs");
+
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     console.log("📁 Storage destination check:");
     console.log("  - File:", file.originalname);
     console.log("  - MIME:", file.mimetype);
 
-    let uploadPath = "src/uploads/";
+    let uploadPath = "uploads/";
     const fileExtension = path.extname(file.originalname).toLowerCase();
-    const threeDExtensions = ['.fbx', '.obj', '.blend', '.dae', '.3ds', '.ply', '.stl', '.gltf', '.glb', '.x3d', '.ma', '.mb'];
+    const threeDExtensions = [
+      ".fbx",
+      ".obj",
+      ".blend",
+      ".dae",
+      ".3ds",
+      ".ply",
+      ".stl",
+      ".gltf",
+      ".glb",
+      ".x3d",
+      ".ma",
+      ".mb",
+    ];
 
     console.log("  - Extension:", fileExtension);
     console.log("  - Is 3D:", threeDExtensions.includes(fileExtension));
@@ -44,6 +59,13 @@ const storage = multer.diskStorage({
     }
 
     console.log("  - Final path:", uploadPath);
+
+    // Ensure directory exists
+    if (!fs.existsSync(uploadPath)) {
+      console.log("  📁 Creating directory:", uploadPath);
+      fs.mkdirSync(uploadPath, { recursive: true });
+    }
+
     cb(null, uploadPath);
   },
   filename: function (req, file, cb) {
@@ -86,14 +108,29 @@ const fileFilter = (req, file, cb) => {
   ];
 
   // 3D model file extensions (check by extension since MIME types vary)
-  const threeDExtensions = ['.fbx', '.obj', '.blend', '.dae', '.3ds', '.ply', '.stl', '.gltf', '.glb', '.x3d', '.ma', '.mb'];
+  const threeDExtensions = [
+    ".fbx",
+    ".obj",
+    ".blend",
+    ".dae",
+    ".3ds",
+    ".ply",
+    ".stl",
+    ".gltf",
+    ".glb",
+    ".x3d",
+    ".ma",
+    ".mb",
+  ];
   const fileExtension = path.extname(file.originalname).toLowerCase();
 
   console.log("  - File extension:", fileExtension);
   console.log("  - Is 3D extension:", threeDExtensions.includes(fileExtension));
   console.log("  - Is allowed MIME:", allowedTypes.includes(file.mimetype));
 
-  const isAllowed = allowedTypes.includes(file.mimetype) || threeDExtensions.includes(fileExtension);
+  const isAllowed =
+    allowedTypes.includes(file.mimetype) ||
+    threeDExtensions.includes(fileExtension);
 
   if (isAllowed) {
     console.log("  ✅ File accepted");
@@ -117,6 +154,20 @@ const upload = multer({
   },
 });
 
+// Test routes (must come before /:id route)
+router.get("/test", (req, res) => {
+  res.json({ success: true, message: "Artwork routes are working!" });
+});
+
+router.post("/test-upload", authMiddleware, (req, res) => {
+  res.json({
+    success: true,
+    message: "Upload endpoint is accessible",
+    user: req.user ? req.user.id : "No user",
+    hasToken: !!req.headers.authorization,
+  });
+});
+
 // Public routes
 router.get("/", getArtworks);
 router.get("/:id", getArtworkById);
@@ -128,14 +179,46 @@ router.delete("/:id", authMiddleware, deleteArtwork);
 router.get("/user/:userId", getUserArtworks);
 router.post("/:id/like", authMiddleware, likeArtwork);
 
-// File upload routes
-router.post("/upload", authMiddleware, upload.array("files", 10), uploadFiles);
+// File upload routes with enhanced logging
+router.post(
+  "/upload",
+  (req, res, next) => {
+    console.log("🚀 Upload endpoint hit!");
+    console.log("- Method:", req.method);
+    console.log("- URL:", req.url);
+    console.log("- Headers:", Object.keys(req.headers));
+    console.log(
+      "- Authorization:",
+      req.headers.authorization ? "Present" : "Missing"
+    );
+    console.log("- Content-Type:", req.headers["content-type"]);
+    next();
+  },
+  authMiddleware,
+  (req, res, next) => {
+    console.log("✅ Auth middleware passed");
+    console.log("- User ID:", req.user?.id);
+    next();
+  },
+  upload.array("files", 10),
+  (req, res, next) => {
+    console.log("📁 Multer processing complete");
+    console.log("- Files received:", req.files?.length || 0);
+    if (req.files) {
+      req.files.forEach((file, i) => {
+        console.log(`  File ${i + 1}:`, file.originalname, "->", file.path);
+      });
+    }
+    next();
+  },
+  uploadFiles
+);
 
 // Special multer config for folder uploads with better error handling
 const folderUpload = multer({
   storage: multer.diskStorage({
     destination: function (req, file, cb) {
-      cb(null, "src/uploads/folders/");
+      cb(null, "uploads/folders/");
     },
     filename: function (req, file, cb) {
       const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
@@ -170,32 +253,39 @@ router.post("/test-upload", authMiddleware, (req, res) => {
 });
 
 // Test 3D file upload specifically
-router.post("/test-3d-upload", authMiddleware, upload.single("file"), (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ success: false, msg: "No file uploaded" });
+router.post(
+  "/test-3d-upload",
+  authMiddleware,
+  upload.single("file"),
+  (req, res) => {
+    try {
+      if (!req.file) {
+        return res
+          .status(400)
+          .json({ success: false, msg: "No file uploaded" });
+      }
+
+      console.log("🎲 3D Test upload successful:");
+      console.log("  - Original name:", req.file.originalname);
+      console.log("  - MIME type:", req.file.mimetype);
+      console.log("  - Size:", req.file.size);
+      console.log("  - Path:", req.file.path);
+
+      res.json({
+        success: true,
+        message: "3D file upload test successful!",
+        file: {
+          originalname: req.file.originalname,
+          mimetype: req.file.mimetype,
+          size: req.file.size,
+          path: req.file.path,
+        },
+      });
+    } catch (error) {
+      console.error("3D upload test error:", error);
+      res.status(500).json({ success: false, msg: error.message });
     }
-
-    console.log("🎲 3D Test upload successful:");
-    console.log("  - Original name:", req.file.originalname);
-    console.log("  - MIME type:", req.file.mimetype);
-    console.log("  - Size:", req.file.size);
-    console.log("  - Path:", req.file.path);
-
-    res.json({
-      success: true,
-      message: "3D file upload test successful!",
-      file: {
-        originalname: req.file.originalname,
-        mimetype: req.file.mimetype,
-        size: req.file.size,
-        path: req.file.path,
-      },
-    });
-  } catch (error) {
-    console.error("3D upload test error:", error);
-    res.status(500).json({ success: false, msg: error.message });
   }
-});
+);
 
 module.exports = router;

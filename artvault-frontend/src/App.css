@@ -453,17 +453,21 @@ body {
 .step-number {
   width: 40px;
   height: 40px;
-  border-radius: 50%;           /* single circle */
-  background-color: #3b82f61a;       /* inactive color */
+  border-radius: 50%;
+  /* single circle */
+  background-color: #3b82f61a;
+  /* inactive color */
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: bold;
-  z-index: 1;                   /* above divider */
+  z-index: 1;
+  /* above divider */
 }
 
 .step.active .step-number {
-  background-color: #667eea;    /* active color */
+  background-color: #667eea;
+  /* active color */
   color: white;
 }
 
@@ -471,18 +475,22 @@ body {
   margin-top: 0.5rem;
   font-size: 0.9rem;
   text-align: center;
-  background: none;             /* ensure no circle */
+  background: none;
+  /* ensure no circle */
   border-radius: 0;
 }
 
 .step-divider {
   flex: 1;
-  height: 4px;                 /* line thickness */
+  height: 4px;
+  /* line thickness */
   background-color: #3b82f61a;
   margin: 0 10px;
   position: relative;
-  top: -20px;                  /* align with circle vertically */
-  z-index: 0;                  /* behind circles */
+  top: -20px;
+  /* align with circle vertically */
+  z-index: 0;
+  /* behind circles */
 }
 
 
@@ -1100,26 +1108,32 @@ ISSING NAVBAR STYLES === */
 }
 
 .sidebar.right-side {
-  right: -var(--sidebar-width); /* initially hidden on right */
-  left: auto;                    /* remove left positioning */
+  right: -var(--sidebar-width);
+  /* initially hidden on right */
+  left: auto;
+  /* remove left positioning */
   width: var(--sidebar-width);
   transition: right var(--transition-normal);
 }
 
 .sidebar.right-side.sidebar-open {
-  right: 0; /* show when open */
+  right: 0;
+  /* show when open */
 }
 
 /* General sidebar base styles (override left for right-side sidebar) */
 .sidebar {
   position: fixed;
   top: var(--navbar-height);
-  left: auto; /* remove left positioning */
-  right: calc(-1 * var(--sidebar-width)); /* hidden initially on right */
+  left: auto;
+  /* remove left positioning */
+  right: calc(-1 * var(--sidebar-width));
+  /* hidden initially on right */
   width: var(--sidebar-width);
   height: calc(100vh - var(--navbar-height));
   background: var(--sidebar-color);
-  border-left: 1px solid var(--border-color); /* border on left since it's right side */
+  border-left: 1px solid var(--border-color);
+  /* border on left since it's right side */
   transition: right var(--transition-normal);
   z-index: 999;
   overflow-y: auto;
@@ -1127,7 +1141,8 @@ ISSING NAVBAR STYLES === */
 }
 
 .sidebar.sidebar-open {
-  right: 0; /* show sidebar */
+  right: 0;
+  /* show sidebar */
 }
 
 .sidebar-header {
@@ -2751,7 +2766,7 @@ NCED PROFILE PAGE STYLES === */
 
 
 .add-artwork-page {
-  padding-top: var(--navbar-height); 
+  padding-top: var(--navbar-height);
 }
 
 .add-artwork-container {
@@ -2839,7 +2854,7 @@ NCED PROFILE PAGE STYLES === */
 
 /* Artwork Form */
 .artwork-form h3 {
-  text-align:center;
+  text-align: center;
   color: #f1f5f9;
   margin-bottom: 1.5rem;
   font-size: 2.5rem;
@@ -2848,7 +2863,7 @@ NCED PROFILE PAGE STYLES === */
 
 .artwork-form label {
   color: white !important;
-  font-weight: 500; 
+  font-weight: 500;
 }
 
 .form-row {
@@ -3007,9 +3022,10 @@ NCED PROFILE PAGE STYLES === */
   color: #ffffff;
 }
 
-.file-upload-area:hover * ,
+.file-upload-area:hover *,
 .file-upload-area.drag-active * {
-  color: #ffffff; /* force all child elements to white */
+  color: #ffffff;
+  /* force all child elements to white */
 }
 
 .file-upload-area.error {
@@ -3462,6 +3478,10 @@ NCED PROFILE PAGE STYLES === */
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  width: 320px;
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
 }
 
 .artwork-card:hover {
@@ -3477,14 +3497,14 @@ NCED PROFILE PAGE STYLES === */
 
 .artwork-preview {
   position: relative;
-  min-height: 200px;
-  max-height: 300px;
+  height: 200px;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
   background: transparent;
   border-radius: 8px;
+  flex-shrink: 0;
 }
 
 .artwork-image,
@@ -3502,11 +3522,51 @@ NCED PROFILE PAGE STYLES === */
   transform: scale(1.05);
 }
 
+/* Artwork Grid - Consistent Column Sizing */
+.artwork-grid {
+  display: grid;
+  gap: 2rem;
+  justify-content: center;
+  padding: 0 1rem;
+}
+
+/* Responsive grid columns - all same width */
+@media (min-width: 1400px) {
+  .artwork-grid {
+    grid-template-columns: repeat(4, 320px);
+  }
+}
+
+@media (min-width: 1080px) and (max-width: 1399px) {
+  .artwork-grid {
+    grid-template-columns: repeat(3, 320px);
+  }
+}
+
+@media (min-width: 720px) and (max-width: 1079px) {
+  .artwork-grid {
+    grid-template-columns: repeat(2, 320px);
+  }
+}
+
+@media (max-width: 719px) {
+  .artwork-grid {
+    grid-template-columns: 320px;
+    padding: 0 0.5rem;
+  }
+
+  .artwork-card {
+    width: 100%;
+    max-width: 320px;
+    margin: 0 auto;
+  }
+}
+
 .artwork-audio-preview,
 .artwork-document-preview {
-  width: 100%;      
-  min-width: 150px; 
-  height: 150px;    
+  width: 100%;
+  min-width: 150px;
+  height: 150px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -3613,6 +3673,8 @@ NCED PROFILE PAGE STYLES === */
   display: flex;
   flex-direction: column;
   padding: 1.5rem;
+  flex-grow: 1;
+  justify-content: space-between;
 }
 
 .artwork-info h3 {
@@ -6550,6 +6612,7 @@ Enhanced Pricing Section */
     font-size: 0.9rem;
   }
 }
+
 /* === ORDER CONFIRMATION POPUP STYLES === */
 .order-popup-overlay {
   position: fixed;
@@ -7019,6 +7082,7 @@ Enhanced Pricing Section */
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -7029,6 +7093,7 @@ Enhanced Pricing Section */
     opacity: 0;
     transform: translateY(50px) scale(0.9);
   }
+
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
@@ -7036,12 +7101,19 @@ Enhanced Pricing Section */
 }
 
 @keyframes bounce {
-  0%, 20%, 50%, 80%, 100% {
+
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
     transform: translateY(0);
   }
+
   40% {
     transform: translateY(-10px);
   }
+
   60% {
     transform: translateY(-5px);
   }
@@ -7053,38 +7125,38 @@ Enhanced Pricing Section */
     width: 95%;
     margin: 1rem;
   }
-  
+
   .popup-header {
     padding: 1.5rem 1.5rem 1rem 1.5rem;
   }
-  
+
   .popup-content {
     padding: 1.5rem;
   }
-  
+
   .popup-actions {
     padding: 1rem 1.5rem 1.5rem 1.5rem;
   }
-  
+
   .artwork-preview {
     flex-direction: column;
     text-align: center;
   }
-  
+
   .detail-grid {
     grid-template-columns: 1fr;
     gap: 1rem;
   }
-  
+
   .artwork-info {
     flex-direction: column;
     text-align: center;
   }
-  
+
   .success-actions {
     flex-direction: column;
   }
-  
+
   .success-actions button {
     width: 100%;
   }
@@ -7094,13 +7166,303 @@ Enhanced Pricing Section */
   .popup-header h2 {
     font-size: 1.5rem;
   }
-  
+
   .success-icon-large {
     font-size: 3rem;
   }
-  
+
   .order-number {
     font-size: 0.9rem;
     padding: 0.4rem 0.8rem;
+  }
+}
+
+/* 3
+D Model Preview Enhancements */
+.artwork-3d-preview {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+
+
+.artwork-3d-preview:hover canvas {
+  transform: scale(1.02);
+}
+
+.artwork-3d-preview canvas {
+  transition: transform 0.2s ease;
+}
+
+/* Enhanced 3D overlay */
+.threed-overlay {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  right: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(4px);
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  color: white;
+  z-index: 5;
+}
+
+.polygon-count,
+.material-count {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.polygon-count {
+  color: #4caf50;
+}
+
+.material-count {
+  color: #ff9800;
+}
+
+/* Modal enhancements */
+.threed-modal-overlay {
+  backdrop-filter: blur(8px);
+}
+
+/* Prevent text selection and context menu on 3D canvas */
+.standard-3d-canvas canvas {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Loading animation for 3D models */
+@keyframes rotate3d {
+  from {
+    transform: rotateY(0deg);
+  }
+
+  to {
+    transform: rotateY(360deg);
+  }
+}
+
+.loading-3d-indicator {
+  animation: rotate3d 2s linear infinite;
+}
+
+/* 3D Canvas improvements */
+.standard-3d-canvas {
+  position: relative;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+}
+
+.standard-3d-canvas.error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #2d1b1b 0%, #1a1a1a 100%);
+}
+
+/ * 3D Model Detail View Styles */ .main-3d-container {
+  width: 100%;
+  margin-bottom: 2rem;
+}
+
+.large-3d-viewer {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+  border-radius: 16px;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4);
+}
+
+.model-thumbnails {
+  margin-top: 1.5rem;
+}
+
+.model-thumbnails h4 {
+  color: var(--text-color);
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.thumbnails-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1rem;
+}
+
+.model-thumbnail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.model-thumbnail:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.thumbnail-filename {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  text-align: center;
+  word-break: break-word;
+}
+
+.additional-images-section {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.additional-images-section h4 {
+  color: var(--text-color);
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.reference-images-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 0.75rem;
+}
+
+.reference-image {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.reference-image:hover {
+  transform: scale(1.05);
+  border-color: var(--primary-color);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.artwork-detail-3d {
+  margin: 1rem 0;
+  display: flex;
+  justify-content: center;
+}
+
+/* Responsive adjustments for 3D viewer */
+@media (max-width: 768px) {
+  .large-3d-viewer {
+    padding: 0.5rem;
+  }
+
+  .thumbnails-grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  }
+
+  .reference-images-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  }
+
+  .reference-image {
+    height: 100px;
+  }
+}
+
+/* Enhanced artwork detail container for 3D models */
+.artwork-detail-container:has(.main-3d-container) .artwork-detail-content {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 2rem;
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  .artwork-detail-container:has(.main-3d-container) .artwork-detail-content {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+/* All 3D Models Grid - Consistent Sizing */
+.all-3d-models-grid {
+  width: 100%;
+}
+
+.all-3d-models-grid h4 {
+  margin: 0 0 1.5rem 0;
+  color: var(--text-accent);
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.models-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  width: 100%;
+  justify-items: center;
+}
+
+.model-item {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.model-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+}
+
+.model-filename {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-family: monospace;
+}
+
+.primary-badge {
+  background: #4ecdc4;
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* Responsive adjustments for 3D models grid - Always single column */
+@media (max-width: 768px) {
+  .models-grid {
+    gap: 1.5rem;
+  }
+
+  .model-item {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .models-grid {
+    gap: 1rem;
   }
 }

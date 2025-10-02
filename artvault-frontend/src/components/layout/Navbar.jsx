@@ -65,6 +65,9 @@ const Navbar = () => {
                 <li>
                   <Link to="/test-payment">Test Payment</Link>
                 </li>
+                <li>
+                  <Link to="/test-fbx">Test FBX</Link>
+                </li>
               </>
             ) : null}
             {isAuthenticated ? (

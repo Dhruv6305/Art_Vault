@@ -6,6 +6,10 @@ const path = require("path");
 // Create new artwork
 exports.createArtwork = async (req, res) => {
   try {
+    console.log("=== CREATE ARTWORK REQUEST ===");
+    console.log("Request body:", JSON.stringify(req.body, null, 2));
+    console.log("Files in request:", req.body.files);
+
     const {
       title,
       description,
@@ -31,6 +35,14 @@ exports.createArtwork = async (req, res) => {
       return res.status(404).json({ success: false, msg: "Artist not found" });
     }
 
+    // Clean up files array - remove any empty or invalid files
+    const cleanFiles = (files || []).filter(
+      (file) => file && file.type && file.url && file.filename
+    );
+
+    console.log("Original files:", files);
+    console.log("Cleaned files:", cleanFiles);
+
     const artwork = new Artwork({
       title,
       description,
@@ -49,7 +61,7 @@ exports.createArtwork = async (req, res) => {
       technique,
       location,
       shipping,
-      files: files || [],
+      files: cleanFiles,
     });
 
     await artwork.save();
@@ -322,22 +334,42 @@ exports.likeArtwork = async (req, res) => {
 
 // Handle file uploads
 exports.uploadFiles = async (req, res) => {
+  console.log("🎯 uploadFiles controller called");
+  console.log("- Files in request:", req.files?.length || 0);
+  console.log("- User:", req.user?.id);
+
   try {
     if (!req.files || req.files.length === 0) {
+      console.log("❌ No files in request");
       return res.status(400).json({ success: false, msg: "No files uploaded" });
     }
+
+    console.log("📋 Processing files:");
 
     const baseUrl = `${req.protocol}://${req.get("host")}`;
 
     const files = req.files.map((file) => {
       // Convert file path to URL format
-      const relativePath = file.path.replace(/\\/g, "/").replace("src/", "");
+      const relativePath = file.path.replace(/\\/g, "/");
       console.log("File path:", file.path, "-> Relative path:", relativePath);
 
       // Determine file type
       const fileExtension = path.extname(file.originalname).toLowerCase();
-      const threeDExtensions = ['.fbx', '.obj', '.blend', '.dae', '.3ds', '.ply', '.stl', '.gltf', '.glb', '.x3d', '.ma', '.mb'];
-      
+      const threeDExtensions = [
+        ".fbx",
+        ".obj",
+        ".blend",
+        ".dae",
+        ".3ds",
+        ".ply",
+        ".stl",
+        ".gltf",
+        ".glb",
+        ".x3d",
+        ".ma",
+        ".mb",
+      ];
+
       let fileType;
       if (file.mimetype.startsWith("image/")) {
         fileType = "image";
@@ -363,7 +395,7 @@ exports.uploadFiles = async (req, res) => {
 
       // Add 3D model specific properties
       if (fileType === "3d_model") {
-        fileData.format = fileExtension.replace('.', '');
+        fileData.format = fileExtension.replace(".", "");
         // These would be populated by a 3D model analyzer in a real implementation
         fileData.vertices = null;
         fileData.polygons = null;
