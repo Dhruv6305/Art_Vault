@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import api from "../../api/axios.js";
 
 const PaymentForm = ({
@@ -26,6 +26,24 @@ const PaymentForm = ({
   const [processing, setProcessing] = useState(false);
   const [errors, setErrors] = useState({});
 
+  // Handle keyboard events and body scroll
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        onBack();
+      }
+    };
+
+    // Prevent body scroll when modal is open
+    document.body.classList.add("modal-open");
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.classList.remove("modal-open");
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [onBack]);
+
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
 
@@ -44,14 +62,14 @@ const PaymentForm = ({
         [name]: checked,
         ...(name === "sameAsShipping" && checked
           ? {
-              billingAddress: {
-                address: orderData?.shippingInfo?.address || "",
-                city: orderData?.shippingInfo?.city || "",
-                state: orderData?.shippingInfo?.state || "",
-                zipCode: orderData?.shippingInfo?.zipCode || "",
-                country: orderData?.shippingInfo?.country || "United States",
-              },
-            }
+            billingAddress: {
+              address: orderData?.shippingInfo?.address || "",
+              city: orderData?.shippingInfo?.city || "",
+              state: orderData?.shippingInfo?.state || "",
+              zipCode: orderData?.shippingInfo?.zipCode || "",
+              country: orderData?.shippingInfo?.country || "United States",
+            },
+          }
           : {}),
       }));
     } else {
@@ -277,83 +295,167 @@ const PaymentForm = ({
   };
 
   return (
-    <div className="payment-form">
-      <div className="order-summary-mini">
-        <h4>Order Summary</h4>
-        <div className="summary-line">
-          <span>{artwork.title}</span>
-          <span>${orderData?.total?.toFixed(2)}</span>
+    <div className="super-payment-modal-overlay" onClick={onBack}>
+      <div className="super-payment-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="super-payment-header">
+          <div className="payment-header-icon">💳</div>
+          <div className="payment-header-content">
+            <h1>Payment Details</h1>
+            <p>Complete your secure payment</p>
+          </div>
+          <button 
+            type="button" 
+            className="modal-close-btn" 
+            onClick={onBack}
+            aria-label="Close modal"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div className="super-payment-content">
+          <div className="super-order-summary-mini">
+        <div className="mini-summary-header">
+          <span className="summary-icon">📋</span>
+          <h4>Order Summary</h4>
+        </div>
+
+        <div className="mini-artwork-display">
+          <div className="mini-artwork-image">
+            {(artwork.category === "3d_model" ||
+              artwork.category === "3D Models" ||
+              artwork.category === "3d_models" ||
+              artwork.subcategory?.toLowerCase().includes("3d") ||
+              artwork.medium?.toLowerCase().includes("3d")) ? (
+              <div className="model-3d-placeholder mini">
+                <div className="model-3d-icon">🎮</div>
+                <div className="model-3d-text">
+                  <span className="model-title">3D Model</span>
+                </div>
+              </div>
+            ) : (
+              artwork.files?.[0] && (
+                <img
+                  src={
+                    artwork.files[0].url.startsWith("http")
+                      ? artwork.files[0].url
+                      : `http://localhost:5000/${artwork.files[0].url}`
+                  }
+                  alt={artwork.title}
+                  className="mini-artwork-img"
+                />
+              )
+            )}
+          </div>
+
+          <div className="mini-artwork-info">
+            <span className="item-name">{artwork.title}</span>
+            <span className="item-artist">by {artwork.artistName}</span>
+            <span className="item-price">${orderData?.total?.toFixed(2)}</span>
+          </div>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="payment-details-form">
-        <div className="form-section">
-          <h4>Payment Information</h4>
+      <form onSubmit={handleSubmit} className="super-payment-details-form">
+        <div className="super-form-section">
+          <div className="section-header">
+            <span className="section-icon">💳</span>
+            <h4>Payment Information</h4>
+          </div>
 
           {errors.general && (
-            <div className="error-message">{errors.general}</div>
+            <div className="super-error-message">
+              <div className="error-icon">⚠️</div>
+              <div className="error-content">
+                <p>{errors.general}</p>
+              </div>
+            </div>
           )}
 
-          <div className="form-group">
-            <label>Cardholder Name *</label>
-            <input
-              type="text"
-              name="cardholderName"
-              value={paymentData.cardholderName}
-              onChange={handleInputChange}
-              className={errors.cardholderName ? "error" : ""}
-              placeholder="John Doe"
-              required
-            />
-            {errors.cardholderName && (
-              <span className="field-error">{errors.cardholderName}</span>
-            )}
-          </div>
-
-          <div className="form-group">
-            <label>Card Number *</label>
-            <input
-              type="text"
-              name="cardNumber"
-              value={paymentData.cardNumber}
-              onChange={handleInputChange}
-              className={errors.cardNumber ? "error" : ""}
-              placeholder="1234 5678 9012 3456"
-              required
-            />
-            {errors.cardNumber && (
-              <span className="field-error">{errors.cardNumber}</span>
-            )}
-          </div>
-
-          <div className="form-row">
-            <div className="form-group">
-              <label>Expiry Date *</label>
+          <div className="super-form-group">
+            <label className="super-label">
+              <span className="label-text">Cardholder Name</span>
+              <span className="required-star">*</span>
+            </label>
+            <div className="input-wrapper">
               <input
                 type="text"
-                name="expiryDate"
-                value={paymentData.expiryDate}
+                name="cardholderName"
+                value={paymentData.cardholderName}
                 onChange={handleInputChange}
-                className={errors.expiryDate ? "error" : ""}
-                placeholder="MM/YY"
+                className={`super-form-input ${errors.cardholderName ? "error" : ""}`}
+                placeholder="Enter full name as on card"
                 required
               />
+              <div className="input-icon">👤</div>
+            </div>
+            {errors.cardholderName && (
+              <span className="super-field-error">{errors.cardholderName}</span>
+            )}
+          </div>
+
+          <div className="super-form-group">
+            <label className="super-label">
+              <span className="label-text">Card Number</span>
+              <span className="required-star">*</span>
+            </label>
+            <div className="input-wrapper">
+              <input
+                type="text"
+                name="cardNumber"
+                value={paymentData.cardNumber}
+                onChange={handleInputChange}
+                className={`super-form-input ${errors.cardNumber ? "error" : ""}`}
+                placeholder="1234 5678 9012 3456"
+                required
+              />
+              <div className="input-icon">💳</div>
+            </div>
+            {errors.cardNumber && (
+              <span className="super-field-error">{errors.cardNumber}</span>
+            )}
+          </div>
+
+          <div className="super-form-row">
+            <div className="super-form-group">
+              <label className="super-label">
+                <span className="label-text">Expiry Date</span>
+                <span className="required-star">*</span>
+              </label>
+              <div className="input-wrapper">
+                <input
+                  type="text"
+                  name="expiryDate"
+                  value={paymentData.expiryDate}
+                  onChange={handleInputChange}
+                  className={`super-form-input ${errors.expiryDate ? "error" : ""}`}
+                  placeholder="MM/YY"
+                  required
+                />
+                <div className="input-icon">📅</div>
+              </div>
               {errors.expiryDate && (
-                <span className="field-error">{errors.expiryDate}</span>
+                <span className="super-field-error">{errors.expiryDate}</span>
               )}
             </div>
-            <div className="form-group">
-              <label>CVV *</label>
-              <input
-                type="text"
-                name="cvv"
-                value={paymentData.cvv}
-                onChange={handleInputChange}
-                className={errors.cvv ? "error" : ""}
-                placeholder="123"
-                required
-              />
-              {errors.cvv && <span className="field-error">{errors.cvv}</span>}
+            <div className="super-form-group">
+              <label className="super-label">
+                <span className="label-text">CVV</span>
+                <span className="required-star">*</span>
+              </label>
+              <div className="input-wrapper">
+                <input
+                  type="text"
+                  name="cvv"
+                  value={paymentData.cvv}
+                  onChange={handleInputChange}
+                  className={`super-form-input ${errors.cvv ? "error" : ""}`}
+                  placeholder="123"
+                  required
+                />
+                <div className="input-icon">🔒</div>
+              </div>
+              {errors.cvv && <span className="super-field-error">{errors.cvv}</span>}
             </div>
           </div>
         </div>
@@ -446,7 +548,7 @@ const PaymentForm = ({
           )}
         </div>
 
-        <div className="payment-actions">
+        <div className="super-payment-actions">
           <button
             type="button"
             className="back-btn"
@@ -461,7 +563,9 @@ const PaymentForm = ({
               : `Pay $${orderData?.total?.toFixed(2)}`}
           </button>
         </div>
-      </form>
+          </form>
+        </div>
+      </div>
     </div>
   );
 };

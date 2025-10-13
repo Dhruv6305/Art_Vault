@@ -2,7 +2,7 @@ import React, { useState, useRef } from "react";
 import api from "../../api/axios.js";
 import Standard3DCanvas from "../3d/Standard3DCanvas.jsx";
 
-const FileUpload = ({ files, onChange, error }) => {
+const FileUpload = ({ files, onChange, error, isEdit = false }) => {
   const [uploading, setUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef(null);
@@ -228,131 +228,187 @@ const FileUpload = ({ files, onChange, error }) => {
     }
   };
 
+  const getFileUrl = (file) => {
+    if (file.preview) return file.preview;
+    if (file.url) {
+      return file.url.startsWith("http") 
+        ? file.url 
+        : `http://localhost:5000/${file.url}`;
+    }
+    return null;
+  };
+
   return (
-    <div className="file-upload-section">
-      <h3>Upload Media Files</h3>
-
-      <div
-        className={`file-upload-area ${dragActive ? "drag-active" : ""} ${
-          error ? "error" : ""
-        }`}
-        onDragEnter={handleDrag}
-        onDragLeave={handleDrag}
-        onDragOver={handleDrag}
-        onDrop={handleDrop}
-        onClick={() => fileInputRef.current?.click()}
-      >
-        <input
-          ref={fileInputRef}
-          type="file"
-          multiple
-          accept="image/*,video/*,audio/*,.pdf,.fbx,.obj,.blend,.dae,.3ds,.ply,.stl,.gltf,.glb,.x3d,.ma,.mb"
-          onChange={handleFileSelect}
-          style={{ display: "none" }}
-        />
-
-        <div className="upload-content">
-          {uploading ? (
-            <div className="uploading">
-              <span className="spinner"></span>
-              <p>Uploading files...</p>
-            </div>
-          ) : (
-            <>
-              <div className="upload-icon">📁</div>
-              <h4>Drop files here or click to browse</h4>
-              <p>
-                Supported formats: Images (JPG, PNG, GIF, WebP), Videos (MP4,
-                AVI, MOV, WebM), Audio (MP3, WAV, OGG, M4A), 3D Models (FBX,
-                OBJ, GLTF, GLB, STL, BLEND), Documents (PDF)
-              </p>
-              <p className="file-limit">Maximum file size: 100MB</p>
-            </>
-          )}
-        </div>
-      </div>
-
-      {error && <span className="field-error">{error}</span>}
-
-      {files.length > 0 && (
-        <div className="uploaded-files">
-          <h4>Uploaded Files ({files.length})</h4>
-          <div className="files-grid">
+    <div className="file-upload-container">
+      {isEdit && files.length > 0 && (
+        <div className="existing-files">
+          <h4>📁 Current Files ({files.length})</h4>
+          <div className="existing-files-grid">
             {files.map((file, index) => (
-              <div
-                key={index}
-                className={`file-item ${file.isPrimary ? "primary" : ""}`}
-              >
-                <div className="file-preview">
-                  {file.type === "image" && file.preview ? (
-                    <img src={file.preview} alt={file.filename} />
+              <div key={index} className="existing-file-item">
+                <div className="existing-file-preview">
+                  {file.type === "image" ? (
+                    <img 
+                      src={getFileUrl(file)} 
+                      alt={file.filename}
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        e.target.nextSibling.style.display = 'flex';
+                      }}
+                    />
                   ) : file.type === "3d_model" ? (
-                    <div className="threed-preview-container">
-                      <Standard3DCanvas
-                        fileUrl={
-                          file.url.startsWith("http")
-                            ? file.url
-                            : `http://localhost:5000/${file.url}`
-                        }
-                        fileName={file.filename}
-                        canvasSize="preview"
-                        showControls={false}
-                        autoRotate={true}
-                        backgroundColor="#1a1a1a"
-                      />
-                    </div>
+                    <div className="file-icon">🎲</div>
                   ) : (
                     <div className="file-icon">{getFileIcon(file.type)}</div>
                   )}
+                  <div className="file-icon" style={{ display: 'none' }}>
+                    {getFileIcon(file.type)}
+                  </div>
                   {file.isPrimary && (
-                    <div className="primary-badge">Primary</div>
+                    <div className="primary-badge">⭐ Primary</div>
                   )}
                 </div>
-
-                <div className="file-info">
-                  <div className="file-name" title={file.filename}>
+                <div className="existing-file-info">
+                  <div className="existing-file-name" title={file.filename}>
                     {file.filename}
                   </div>
-                  <div className="file-details">
-                    <span className="file-type">{file.type}</span>
-                    <span className="file-size">
-                      {formatFileSize(file.size)}
-                    </span>
-                  </div>
                 </div>
-
-                <div className="file-actions">
-                  {!file.isPrimary && (
-                    <button
-                      type="button"
-                      onClick={() => setPrimaryFile(index)}
-                      className="btn-icon"
-                      title="Set as primary"
-                    >
-                      ⭐
-                    </button>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => removeFile(index)}
-                    className="btn-icon remove"
-                    title="Remove file"
-                  >
-                    🗑️
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => removeFile(index)}
+                  className="remove-file-btn"
+                  title="Remove this file"
+                >
+                  ×
+                </button>
               </div>
             ))}
           </div>
-
-          <div className="upload-help">
-            <p>
-              💡 <strong>Tip:</strong> Click the star icon to set a primary file
-              that will be displayed as the main preview.
-            </p>
-          </div>
         </div>
       )}
+
+      <div className="file-upload-section">
+        <h3>{isEdit ? "📎 Add More Files" : "📁 Upload Media Files"}</h3>
+
+        <div
+          className={`file-upload-area ${dragActive ? "drag-active" : ""} ${
+            error ? "error" : ""
+          }`}
+          onDragEnter={handleDrag}
+          onDragLeave={handleDrag}
+          onDragOver={handleDrag}
+          onDrop={handleDrop}
+          onClick={() => fileInputRef.current?.click()}
+        >
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            accept="image/*,video/*,audio/*,.pdf,.fbx,.obj,.blend,.dae,.3ds,.ply,.stl,.gltf,.glb,.x3d,.ma,.mb"
+            onChange={handleFileSelect}
+            style={{ display: "none" }}
+          />
+
+          <div className="upload-content">
+            {uploading ? (
+              <div className="uploading">
+                <span className="spinner"></span>
+                <p>Uploading files...</p>
+              </div>
+            ) : (
+              <>
+                <div className="upload-icon">📁</div>
+                <div className="upload-text">
+                  {isEdit ? "Add more files" : "Drop files here or click to browse"}
+                </div>
+                <div className="upload-hint">
+                  Supported: Images, Videos, Audio, 3D Models, Documents
+                  <br />
+                  Maximum file size: 100MB
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+
+        {error && <span className="field-error">{error}</span>}
+
+        {!isEdit && files.length > 0 && (
+          <div className="uploaded-files">
+            <h4>📎 Newly Added Files ({files.length})</h4>
+            <div className="files-grid">
+              {files.map((file, index) => (
+                <div
+                  key={index}
+                  className={`file-item ${file.isPrimary ? "primary" : ""}`}
+                >
+                  <div className="file-preview">
+                    {file.type === "image" && file.preview ? (
+                      <img src={file.preview} alt={file.filename} />
+                    ) : file.type === "3d_model" ? (
+                      <div className="threed-preview-container">
+                        <Standard3DCanvas
+                          fileUrl={getFileUrl(file)}
+                          fileName={file.filename}
+                          canvasSize="preview"
+                          showControls={false}
+                          autoRotate={true}
+                          backgroundColor="#1a1a1a"
+                        />
+                      </div>
+                    ) : (
+                      <div className="file-icon">{getFileIcon(file.type)}</div>
+                    )}
+                    {file.isPrimary && (
+                      <div className="primary-badge">Primary</div>
+                    )}
+                  </div>
+
+                  <div className="file-info">
+                    <div className="file-name" title={file.filename}>
+                      {file.filename}
+                    </div>
+                    <div className="file-details">
+                      <span className="file-type">{file.type}</span>
+                      <span className="file-size">
+                        {formatFileSize(file.size)}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="file-actions">
+                    {!file.isPrimary && (
+                      <button
+                        type="button"
+                        onClick={() => setPrimaryFile(index)}
+                        className="btn-icon"
+                        title="Set as primary"
+                      >
+                        ⭐
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => removeFile(index)}
+                      className="btn-icon remove"
+                      title="Remove file"
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="upload-help">
+              <p>
+                💡 <strong>Tip:</strong> Click the star icon to set a primary file
+                that will be displayed as the main preview.
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

@@ -497,7 +497,7 @@ const ThreeDDisplay = ({
 
           {/* Artwork Stats */}
           <div
-            className="artwork-stats"
+            className="threed-artwork-stats"
             style={{
               marginTop: "25px",
               padding: "15px",

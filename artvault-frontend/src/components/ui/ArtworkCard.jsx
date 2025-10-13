@@ -1,11 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext.jsx";
 import api from "../../api/axios.js";
-import Standard3DCanvas from "../3d/Standard3DCanvas.jsx";
 import ThreeDModelModal from "../3d/ThreeDModelModal.jsx";
 
-const ArtworkCard = ({ artwork, showActions = true }) => {
+const ArtworkCard = React.memo(({ artwork, showActions = true }) => {
   const { user } = useAuth();
   const [liked, setLiked] = useState(
     artwork.likes?.some((like) => like.user === user?.id) || false
@@ -17,7 +16,7 @@ const ArtworkCard = ({ artwork, showActions = true }) => {
   const primaryFile =
     artwork.files?.find((file) => file.isPrimary) || artwork.files?.[0];
 
-  const handleLike = async (e) => {
+  const handleLike = useCallback(async (e) => {
     e.preventDefault();
     e.stopPropagation();
 
@@ -39,36 +38,21 @@ const ArtworkCard = ({ artwork, showActions = true }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, artwork._id]);
 
-  const formatPrice = (price) => {
-    const formatter = new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: price.currency || "USD",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2,
-    });
-    return formatter.format(price.amount);
-  };
+  // Memoize price formatter for better performance
+  const priceFormatter = useMemo(() => new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  }), []);
 
-  const formatDimensions = (dimensions) => {
-    if (!dimensions) return "";
+  const formatPrice = useCallback((price) => {
+    return priceFormatter.format(price.amount);
+  }, [priceFormatter]);
 
-    // If it's already a string, return it
-    if (typeof dimensions === "string") return dimensions;
 
-    // If it's an object, format it
-    if (typeof dimensions === "object") {
-      const { width, height, depth, unit } = dimensions;
-      if (depth && depth !== "0" && depth !== 0) {
-        return `${width} × ${height} × ${depth} ${unit || "cm"}`;
-      } else {
-        return `${width} × ${height} ${unit || "cm"}`;
-      }
-    }
-
-    return String(dimensions);
-  };
 
   const getFilePreview = (file) => {
     if (!file) return null;
@@ -78,7 +62,7 @@ const ArtworkCard = ({ artwork, showActions = true }) => {
       ? file.url
       : `http://localhost:5000/${file.url}`;
 
-    console.log("File preview URL:", fileUrl);
+
 
     // Check if it's a 3D model by file type OR file extension
     const is3DModel =
@@ -89,27 +73,17 @@ const ArtworkCard = ({ artwork, showActions = true }) => {
 
     if (is3DModel) {
       return (
-        <div className="artwork-3d-preview">
-          <Standard3DCanvas
-            fileUrl={fileUrl}
-            fileName={file.filename}
-            width={300}
-            height={200}
-            showControls={true}
-            autoRotate={false}
-            backgroundColor="#1a1a1a"
-            showInfo={true}
-            preventDownload={true}
-            onModelClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              setShowThreeDModal(true);
-            }}
-            style={{
-              cursor: "grab",
-              transition: "transform 0.2s ease",
-            }}
-          />
+        <div 
+          className="artwork-3d-preview-placeholder"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setShowThreeDModal(true);
+          }}
+        >
+          <div className="artwork-3d-icon">🎮</div>
+          <div className="artwork-3d-text">3D Model</div>
+          <div className="artwork-3d-subtitle">Click to view</div>
         </div>
       );
     }
@@ -121,9 +95,10 @@ const ArtworkCard = ({ artwork, showActions = true }) => {
             src={fileUrl}
             alt={artwork.title}
             className="artwork-image"
-            onError={(e) => {
+            loading="lazy"
+            decoding="async"
+            onError={() => {
               console.error("Image failed to load:", fileUrl);
-              e.target.style.display = "none";
             }}
           />
         );
@@ -134,8 +109,9 @@ const ArtworkCard = ({ artwork, showActions = true }) => {
             className="artwork-video"
             controls={false}
             muted
+            preload="none"
             poster={`${fileUrl}#t=1`}
-            onError={(e) => {
+            onError={() => {
               console.error("Video failed to load:", fileUrl);
             }}
           />
@@ -227,7 +203,12 @@ const ArtworkCard = ({ artwork, showActions = true }) => {
 
           <div className="artwork-info">
             <h3 className="artwork-title">{artwork.title}</h3>
-            <p className="artwork-artist">by {artwork.artistName}</p>
+            <p className="artwork-artist">
+              by {artwork.artistName}
+              {user && (user.id === artwork.artist || user._id === artwork.artist) && (
+                <span className="owner-badge">👑 Your Art</span>
+              )}
+            </p>
 
             <div className="artwork-details">
               <span className="artwork-medium">{artwork.medium}</span>
@@ -246,7 +227,7 @@ const ArtworkCard = ({ artwork, showActions = true }) => {
                 )}
               </div>
 
-              <div className="artwork-stats">
+              <div className="artwork-card-stats">
                 <span className="views">👁️ {artwork.views}</span>
                 {artwork.quantity > 1 && (
                   <span className="quantity-info">
@@ -302,6 +283,6 @@ const ArtworkCard = ({ artwork, showActions = true }) => {
       />
     </>
   );
-};
+});
 
 export default ArtworkCard;

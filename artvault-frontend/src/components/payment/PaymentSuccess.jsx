@@ -1,10 +1,28 @@
-import React, { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 const PaymentSuccess = ({ artwork, orderData, onClose }) => {
   const navigate = useNavigate();
   const [showOrderPopup, setShowOrderPopup] = useState(true);
   const printRef = useRef();
+
+  // Handle keyboard events and body scroll
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+
+    // Prevent body scroll when modal is open
+    document.body.classList.add("modal-open");
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.classList.remove("modal-open");
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [onClose]);
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
@@ -207,17 +225,32 @@ const PaymentSuccess = ({ artwork, orderData, onClose }) => {
           
           <div className="quick-order-summary">
             <div className="artwork-preview">
-              {artwork.files?.[0] && (
-                <img
-                  src={
-                    artwork.files[0].url.startsWith("http")
-                      ? artwork.files[0].url
-                      : `http://localhost:5000/${artwork.files[0].url}`
-                  }
-                  alt={artwork.title}
-                  className="popup-artwork-image"
-                />
-              )}
+              <div className="popup-artwork-image-container">
+                {(artwork.category === "3d_model" || 
+                  artwork.category === "3D Models" || 
+                  artwork.category === "3d_models" ||
+                  artwork.subcategory?.toLowerCase().includes("3d") ||
+                  artwork.medium?.toLowerCase().includes("3d")) ? (
+                  <div className="model-3d-placeholder popup">
+                    <div className="model-3d-icon">🎮</div>
+                    <div className="model-3d-text">
+                      <span className="model-title">3D Model</span>
+                    </div>
+                  </div>
+                ) : (
+                  artwork.files?.[0] && (
+                    <img
+                      src={
+                        artwork.files[0].url.startsWith("http")
+                          ? artwork.files[0].url
+                          : `http://localhost:5000/${artwork.files[0].url}`
+                      }
+                      alt={artwork.title}
+                      className="popup-artwork-image"
+                    />
+                  )
+                )}
+              </div>
               <div className="artwork-details">
                 <h4>{artwork.title}</h4>
                 <p>by {artwork.artistName}</p>
@@ -252,7 +285,26 @@ const PaymentSuccess = ({ artwork, orderData, onClose }) => {
     <>
       {showOrderPopup && <OrderConfirmationPopup />}
       
-      <div className="payment-success">
+      <div className="super-success-modal-overlay" onClick={onClose}>
+        <div className="super-success-modal" onClick={(e) => e.stopPropagation()}>
+          <div className="super-success-header">
+            <div className="success-header-icon">✅</div>
+            <div className="success-header-content">
+              <h1>Order Confirmed!</h1>
+              <p>Your payment was successful</p>
+            </div>
+            <button 
+              type="button" 
+              className="modal-close-btn" 
+              onClick={onClose}
+              aria-label="Close modal"
+            >
+              ✕
+            </button>
+          </div>
+
+          <div className="super-success-content">
+            <div className="payment-success">
         <div className="success-header">
           <div className="success-icon">✅</div>
           <h2>Order Confirmed!</h2>
@@ -290,17 +342,32 @@ const PaymentSuccess = ({ artwork, orderData, onClose }) => {
         <div className="section">
           <h3>Artwork Details</h3>
           <div className="artwork-info">
-            {artwork.files?.[0] && (
-              <img
-                src={
-                  artwork.files[0].url.startsWith("http")
-                    ? artwork.files[0].url
-                    : `http://localhost:5000/${artwork.files[0].url}`
-                }
-                alt={artwork.title}
-                className="artwork-image"
-              />
-            )}
+            <div className="artwork-image-container">
+              {(artwork.category === "3d_model" || 
+                artwork.category === "3D Models" || 
+                artwork.category === "3d_models" ||
+                artwork.subcategory?.toLowerCase().includes("3d") ||
+                artwork.medium?.toLowerCase().includes("3d")) ? (
+                <div className="model-3d-placeholder success">
+                  <div className="model-3d-icon">🎮</div>
+                  <div className="model-3d-text">
+                    <span className="model-title">3D Model</span>
+                  </div>
+                </div>
+              ) : (
+                artwork.files?.[0] && (
+                  <img
+                    src={
+                      artwork.files[0].url.startsWith("http")
+                        ? artwork.files[0].url
+                        : `http://localhost:5000/${artwork.files[0].url}`
+                    }
+                    alt={artwork.title}
+                    className="artwork-image"
+                  />
+                )
+              )}
+            </div>
             <div>
               <h4>{artwork.title}</h4>
               <p><strong>Artist:</strong> {artwork.artistName}</p>
@@ -397,7 +464,10 @@ const PaymentSuccess = ({ artwork, orderData, onClose }) => {
           </button>
         )}
       </div>
-    </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </>
   );
 };

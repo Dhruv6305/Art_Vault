@@ -12,6 +12,7 @@ import Dashboard from "./pages/Dashboard.jsx";
 import Profile from "./pages/Profile.jsx";
 import AuthSuccess from "./pages/AuthSuccess.jsx";
 import AddArtwork from "./pages/AddArtwork.jsx";
+import EditArtwork from "./pages/EditArtwork.jsx";
 import MyArtworks from "./pages/MyArtworks.jsx";
 import BrowseArtworks from "./pages/BrowseArtworks.jsx";
 import ArtworkDetail from "./pages/ArtworkDetail.jsx";
@@ -21,9 +22,11 @@ import GoogleAuthTest from "./components/GoogleAuthTest.jsx";
 import TokenTest from "./components/TokenTest.jsx";
 import SystemStatusChecker from "./components/SystemStatusChecker.jsx";
 import Orders from "./pages/Orders.jsx";
+import CancelledOrders from "./pages/CancelledOrders.jsx";
 import OrderDetails from "./pages/OrderDetails.jsx";
 import Test3D from "./pages/Test3D.jsx";
 import TestFBX from "./pages/TestFBX.jsx";
+import Analytics from "./pages/Analytics.jsx";
 import ToastContainer from "./components/ui/ToastContainer.jsx";
 import { useToast } from "./hooks/useToast.js";
 
@@ -82,6 +85,7 @@ function App() {
             <Route path="/browse" element={<BrowseArtworks />} />
             <Route path="/artwork/:id" element={<ArtworkDetail />} />
             <Route path="/add-artwork" element={<AddArtwork />} />
+            <Route path="/edit-artwork/:id" element={<EditArtwork />} />
             <Route path="/my-artworks" element={<MyArtworks />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/profile" element={<Profile />} />
@@ -91,9 +95,11 @@ function App() {
             <Route path="/google-auth-test" element={<GoogleAuthTest />} />
             <Route path="/token-test" element={<TokenTest />} />
             <Route path="/orders" element={<Orders />} />
+            <Route path="/cancelled-orders" element={<CancelledOrders />} />
             <Route path="/orders/:id" element={<OrderDetails />} />
             <Route path="/test-3d" element={<Test3D />} />
             <Route path="/test-fbx" element={<TestFBX />} />
+            <Route path="/analytics" element={<Analytics />} />
             <Route path="/auth/success" element={<AuthSuccess />} />
           </Routes>
         </main>

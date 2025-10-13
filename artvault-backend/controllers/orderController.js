@@ -346,10 +346,146 @@ const getEstimatedDelivery = (shippingMethod) => {
   });
 };
 
+// Cancel order (for buyers) - Simplified for debugging
+const cancelOrder = async (req, res) => {
+  try {
+    console.log("🚫 Cancel order request:", {
+      orderId: req.params.id,
+      userId: req.user?.id,
+      userEmail: req.user?.email,
+    });
+
+    // Step 1: Find order with minimal population first
+    console.log("🔍 Step 1: Finding order...");
+    const order = await Order.findById(req.params.id);
+    
+    if (!order) {
+      console.log("❌ Order not found");
+      return res.status(404).json({ success: false, msg: "Order not found" });
+    }
+    
+    console.log("✅ Order found:", order._id);
+
+    // Step 2: Check authorization
+    console.log("🔍 Step 2: Checking authorization...");
+    if (order.buyer.toString() !== req.user.id) {
+      console.log("❌ Access denied");
+      return res.status(403).json({ success: false, msg: "Access denied" });
+    }
+    console.log("✅ Authorization passed");
+
+    // Step 3: Check if order can be cancelled
+    console.log("🔍 Step 3: Checking order status...");
+    if (!["confirmed", "processing"].includes(order.status)) {
+      console.log("❌ Cannot cancel order with status:", order.status);
+      return res.status(400).json({
+        success: false,
+        msg: `Cannot cancel order with status: ${order.status}`,
+      });
+    }
+    console.log("✅ Order can be cancelled");
+
+    // Step 4: Update order status (minimal change first)
+    console.log("🔍 Step 4: Updating order status...");
+    order.status = "cancelled";
+    await order.save();
+    console.log("✅ Order status updated to cancelled");
+
+    // Return success immediately to test if the basic operation works
+    console.log("✅ Basic cancel operation successful");
+    
+    const response = {
+      success: true,
+      msg: "Order cancelled successfully",
+      order: {
+        _id: order._id,
+        status: order.status,
+      },
+    };
+
+    console.log("📤 Sending response:", JSON.stringify(response));
+    
+    // Ensure response is sent immediately and connection is closed
+    res.status(200).json(response);
+    
+    // Explicitly end the response to prevent any hanging
+    if (!res.headersSent) {
+      res.end();
+    }
+    
+    console.log("✅ Response sent successfully");
+
+    // Do the additional operations asynchronously after response is sent
+    console.log("🔍 Starting async operations...");
+    
+    // Restore artwork quantity (async)
+    try {
+      const artwork = await Artwork.findById(order.artwork);
+      if (artwork) {
+        artwork.quantity += order.quantity;
+        await artwork.save();
+        console.log("✅ Artwork quantity restored asynchronously");
+      }
+    } catch (artworkError) {
+      console.error("⚠️ Artwork quantity restoration failed:", artworkError.message);
+    }
+
+    // Create notification (async)
+    try {
+      const notification = new Notification({
+        user: order.artist,
+        type: "order_cancelled",
+        title: "Order Cancelled",
+        message: `Order #${order._id.toString().slice(-8)} has been cancelled by the buyer.`,
+        data: {
+          orderId: order._id,
+          artworkId: order.artwork,
+          quantity: order.quantity,
+        },
+      });
+      await notification.save();
+      console.log("✅ Notification created asynchronously");
+    } catch (notificationError) {
+      console.error("⚠️ Notification creation failed:", notificationError.message);
+    }
+
+  } catch (error) {
+    console.error("❌ Cancel order error:", error.message);
+    console.error("📋 Error stack:", error.stack);
+    console.error("📋 Error name:", error.name);
+    
+    // More detailed error information
+    if (error.name === 'CastError') {
+      console.error("📋 Cast Error - Invalid ID format");
+      return res.status(400).json({ 
+        success: false, 
+        msg: "Invalid order ID format",
+        error: process.env.NODE_ENV === "development" ? error.message : "Invalid ID"
+      });
+    }
+    
+    if (error.name === 'ValidationError') {
+      console.error("📋 Validation Error:", error.errors);
+      return res.status(400).json({ 
+        success: false, 
+        msg: "Validation error",
+        error: process.env.NODE_ENV === "development" ? error.message : "Validation failed"
+      });
+    }
+    
+    res.status(500).json({ 
+      success: false, 
+      msg: "Server error",
+      error: process.env.NODE_ENV === "development" ? error.message : "Internal server error"
+    });
+  }
+};
+
 module.exports = {
   createOrder,
   getUserOrders,
   getArtistSales,
   getOrderDetails,
   updateOrderStatus,
+  cancelOrder,
 };

@@ -63,6 +63,9 @@ const Navbar = () => {
                   <Link to="/my-artworks">My Art</Link>
                 </li>
                 <li>
+                  <Link to="/analytics">Analytics</Link>
+                </li>
+                <li>
                   <Link to="/test-payment">Test Payment</Link>
                 </li>
                 <li>
@@ -72,9 +75,6 @@ const Navbar = () => {
             ) : null}
             {isAuthenticated ? (
               <>
-                <li>
-                  <Link to="/orders">Orders</Link>
-                </li>
                 <li>
                   <NotificationBell />
                 </li>

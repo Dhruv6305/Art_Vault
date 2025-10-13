@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import api from "../api/axios.js";
 import ArtworkCard from "../components/ui/ArtworkCard.jsx";
 import ThreeDFilters from "../components/filters/ThreeDFilters.jsx";
 
 const BrowseArtworks = () => {
+  console.log("BrowseArtworks component rendering"); // Debug log
+  
   const [searchParams, setSearchParams] = useSearchParams();
   const [artworks, setArtworks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -58,6 +60,7 @@ const BrowseArtworks = () => {
 
   const fetchArtworks = async () => {
     try {
+      console.log("Fetching artworks with filters:", filters); // Debug log
       setLoading(true);
       setError("");
 
@@ -73,7 +76,11 @@ const BrowseArtworks = () => {
         }
       });
 
+      console.log("API params:", params); // Debug log
+
       const response = await api.get("/artworks", { params });
+
+      console.log("API response:", response.data); // Debug log
 
       if (response.data.success) {
         setArtworks(response.data.artworks);
@@ -87,20 +94,20 @@ const BrowseArtworks = () => {
     }
   };
 
-  const handleFilterChange = (key, value) => {
+  const handleFilterChange = useCallback((key, value) => {
     setFilters((prev) => ({
       ...prev,
       [key]: value,
       page: 1, // Reset to first page when filters change
     }));
-  };
+  }, []);
 
-  const handlePageChange = (newPage) => {
+  const handlePageChange = useCallback((newPage) => {
     setFilters((prev) => ({ ...prev, page: newPage }));
     window.scrollTo({ top: 0, behavior: "smooth" });
-  };
+  }, []);
 
-  const clearFilters = () => {
+  const clearFilters = useCallback(() => {
     setFilters({
       category: "all",
       minPrice: "",
@@ -110,13 +117,15 @@ const BrowseArtworks = () => {
       sortOrder: "desc",
       page: 1,
     });
-  };
+  }, []);
+
+  console.log("Rendering with state:", { loading, artworks: artworks.length, error }); // Debug log
 
   return (
-    <div className="browse-artworks-page">
-      <div className="browse-header">
-        <h1>Browse Artworks</h1>
-        <p>Discover amazing art from talented artists around the world</p>
+    <div className="browse-artworks-page" style={{ padding: '2rem', marginTop: '70px', minHeight: '100vh' }}>
+      <div className="browse-header" style={{ textAlign: 'center', marginBottom: '2rem' }}>
+        <h1 style={{ color: 'var(--text-color, #e2e8f0)' }}>Browse Artworks</h1>
+        <p style={{ color: 'var(--text-secondary, #94a3b8)' }}>Discover amazing art from talented artists around the world</p>
       </div>
 
       <div className="browse-controls">
@@ -205,9 +214,16 @@ const BrowseArtworks = () => {
 
       <div className="browse-content">
         {loading ? (
-          <div className="loading-container">
-            <span className="spinner"></span>
-            <p>Loading artworks...</p>
+          <div className="artworks-grid">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <div key={`loading-${index}`} className="artwork-card-loading">
+                <div className="artwork-preview-loading">
+                  <div className="spinner"></div>
+                </div>
+                <div className="loading-skeleton loading-title"></div>
+                <div className="loading-skeleton loading-text"></div>
+              </div>
+            ))}
           </div>
         ) : artworks.length === 0 ? (
           <div className="empty-state">
@@ -231,7 +247,11 @@ const BrowseArtworks = () => {
 
             <div className="artworks-grid">
               {artworks.map((artwork) => (
-                <ArtworkCard key={artwork._id} artwork={artwork} />
+                <ArtworkCard 
+                  key={artwork._id} 
+                  artwork={artwork} 
+                  showActions={true}
+                />
               ))}
             </div>
 

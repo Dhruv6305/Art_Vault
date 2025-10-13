@@ -6,6 +6,7 @@ const {
   getArtistSales,
   getOrderDetails,
   updateOrderStatus,
+  cancelOrder,
 } = require("../controllers/orderController");
 const authMiddleware = require("../middleware/authMiddleware");
 
@@ -33,5 +34,10 @@ router.get("/:id", authMiddleware, getOrderDetails);
 // @desc    Update order status (for artists)
 // @access  Private
 router.put("/:id/status", authMiddleware, updateOrderStatus);
+
+// @route   PUT /api/orders/:id/cancel
+// @desc    Cancel an order (for buyers)
+// @access  Private
+router.put("/:id/cancel", authMiddleware, cancelOrder);
 
 module.exports = router;

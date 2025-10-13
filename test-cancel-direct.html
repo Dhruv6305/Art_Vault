@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Direct Cancel Order Test</title>
+</head>
+<body>
+    <h1>Direct Cancel Order Test</h1>
+    <p>This will test the cancel order API directly without React/Axios</p>
+    
+    <div>
+        <label>Order ID: <input type="text" id="orderId" placeholder="Enter order ID"></label><br><br>
+        <button onclick="testCancel()">Test Cancel Order</button>
+    </div>
+    
+    <div id="result" style="margin-top: 20px; padding: 10px; border: 1px solid #ccc;"></div>
+
+    <script>
+        async function testCancel() {
+            const orderId = document.getElementById('orderId').value;
+            const resultDiv = document.getElementById('result');
+            
+            if (!orderId) {
+                resultDiv.innerHTML = '<p style="color: red;">Please enter an order ID</p>';
+                return;
+            }
+
+            const token = localStorage.getItem('token');
+            if (!token) {
+                resultDiv.innerHTML = '<p style="color: red;">No token found. Please log in first.</p>';
+                return;
+            }
+
+            resultDiv.innerHTML = '<p>Testing cancel order...</p>';
+
+            try {
+                console.log('Making cancel request...');
+                
+                const response = await fetch(`http://localhost:5000/api/orders/${orderId}/cancel`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-auth-token': token
+                    }
+                });
+
+                console.log('Response received:', response);
+                console.log('Response status:', response.status);
+                console.log('Response ok:', response.ok);
+                console.log('Response headers:', [...response.headers.entries()]);
+
+                const responseText = await response.text();
+                console.log('Raw response text:', responseText);
+
+                let data;
+                try {
+                    data = JSON.parse(responseText);
+                    console.log('Parsed JSON:', data);
+                } catch (parseError) {
+                    console.error('JSON parse error:', parseError);
+                    resultDiv.innerHTML = `
+                        <h3>JSON Parse Error</h3>
+                        <p><strong>Status:</strong> ${response.status}</p>
+                        <p><strong>Raw Response:</strong></p>
+                        <pre>${responseText}</pre>
+                    `;
+                    return;
+                }
+
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <h3 style="color: green;">✅ Success!</h3>
+                        <p><strong>Status:</strong> ${response.status}</p>
+                        <p><strong>Message:</strong> ${data.msg}</p>
+                        <p><strong>Success Flag:</strong> ${data.success}</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <h3 style="color: red;">❌ Error</h3>
+                        <p><strong>Status:</strong> ${response.status}</p>
+                        <p><strong>Message:</strong> ${data.msg || 'Unknown error'}</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                }
+
+            } catch (error) {
+                console.error('Request error:', error);
+                resultDiv.innerHTML = `
+                    <h3 style="color: red;">❌ Request Failed</h3>
+                    <p><strong>Error:</strong> ${error.message}</p>
+                    <p>Check console for more details</p>
+                `;
+            }
+        }
+
+        // Instructions
+        document.addEventListener('DOMContentLoaded', function() {
+            const instructions = document.createElement('div');
+            instructions.innerHTML = `
+                <h3>Instructions:</h3>
+                <ol>
+                    <li>Make sure you're logged in to the main app first</li>
+                    <li>Find an order ID from the orders page (last 8 characters are fine)</li>
+                    <li>Enter the order ID above and click "Test Cancel Order"</li>
+                    <li>Check both the result here and the browser console</li>
+                </ol>
+            `;
+            instructions.style.background = '#f0f0f0';
+            instructions.style.padding = '10px';
+            instructions.style.marginBottom = '20px';
+            document.body.insertBefore(instructions, document.body.firstChild.nextSibling);
+        });
+    </script>
+</body>
+</html>

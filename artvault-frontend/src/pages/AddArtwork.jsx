@@ -1,12 +1,10 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import api from "../api/axios.js";
 import FileUpload from "../components/ui/FileUpload.jsx";
 import FolderUpload from "../components/ui/FolderUpload.jsx";
 import ArtworkForm from "../components/ui/ArtworkForm.jsx";
-import DebugArtwork from "../components/DebugArtwork.jsx";
-import DebugUpload from "../components/DebugUpload.jsx";
 
 const AddArtwork = () => {
   const navigate = useNavigate();
@@ -270,7 +268,7 @@ const AddArtwork = () => {
 
   if (!user) {
     return (
-      <div className="add-artwork-page">
+      <div className="super-add-artwork-page">
         <div className="auth-required">
           <h2>Authentication Required</h2>
           <p>Please log in to add artwork.</p>
@@ -280,11 +278,47 @@ const AddArtwork = () => {
   }
 
   return (
-    <div className="add-artwork-page">
-      <DebugUpload />
-      <DebugArtwork />
+    <div className="super-add-artwork-page">
+      <div className="super-add-header">
+        <div className="add-header-icon">🎨</div>
+        <div className="add-header-content">
+          <h1>Create New Artwork</h1>
+          <p>Share your creative masterpiece with the world</p>
+        </div>
+        <div className="add-progress">
+          <div className="progress-step">
+            <span className={`step-number ${currentStep >= 1 ? 'active' : ''}`}>1</span>
+            <span className="step-label">Details</span>
+          </div>
+          <div className="progress-line"></div>
+          <div className="progress-step">
+            <span className={`step-number ${currentStep >= 2 ? 'active' : ''}`}>2</span>
+            <span className="step-label">Files & Upload</span>
+          </div>
+        </div>
+      </div>
 
-      <div className="add-artwork-content">
+      {successMessage && (
+        <div className="super-success-message">
+          <div className="success-icon">✅</div>
+          <div className="success-content">
+            <h4>Success!</h4>
+            <p>{successMessage}</p>
+          </div>
+        </div>
+      )}
+
+      {errors.general && (
+        <div className="super-error-message">
+          <div className="error-icon">⚠️</div>
+          <div className="error-content">
+            <h4>Error</h4>
+            <p>{errors.general}</p>
+          </div>
+        </div>
+      )}
+
+      <div className="super-add-content">
         {currentStep === 1 && (
           <>
             <ArtworkForm
@@ -294,263 +328,231 @@ const AddArtwork = () => {
               onChange={handleInputChange}
             />
 
-            {/* Enhanced Pricing Section */}
-            <div className="enhanced-pricing-section">
-              <div className="pricing-header">
-                <h3>💰 Pricing & Sales Details</h3>
-                <p className="pricing-subtitle">
-                  Set your artwork's price and availability
-                </p>
+            {/* Super Pricing Section */}
+            <div className="super-form-section">
+              <div className="section-header">
+                <span className="section-icon">💰</span>
+                <h4>Pricing & Sales Details</h4>
+                <span className="section-subtitle">Set your artwork's value and availability</span>
               </div>
 
-              <div className="pricing-content">
-                {/* Main Price Input */}
-                <div className="price-main-group">
-                  <label htmlFor="price.amount" className="price-label">
-                    <span className="label-text">Selling Price *</span>
-                    <span className="label-hint">
-                      Set a competitive price for your artwork
+              <div className="super-form-group">
+                <label htmlFor="price.amount" className="super-label">
+                  <span className="label-text">Selling Price</span>
+                  <span className="required-star">*</span>
+                </label>
+
+                <div className="super-price-container">
+                  <div className="select-wrapper currency-select-wrapper">
+                    <select
+                      name="price.currency"
+                      value={formData.price.currency}
+                      onChange={handleInputChange}
+                      className="super-form-select currency-select"
+                    >
+                      <option value="INR">🇮🇳 INR</option>
+                      <option value="USD">🇺🇸 USD</option>
+                      <option value="EUR">🇪🇺 EUR</option>
+                      <option value="GBP">🇬🇧 GBP</option>
+                      <option value="CAD">🇨🇦 CAD</option>
+                      <option value="AUD">�� AUIND</option>
+                    </select>
+                    <div className="select-icon">💱</div>
+                  </div>
+
+                  <div className="input-wrapper price-input-wrapper">
+                    <input
+                      id="price.amount"
+                      type="number"
+                      name="price.amount"
+                      value={formData.price.amount}
+                      onChange={handleInputChange}
+                      className={`super-form-input ${errors["price.amount"] ? "error" : ""}`}
+                      placeholder="Enter your price..."
+                      min="0"
+                      step="0.01"
+                    />
+                    <div className="input-icon">💰</div>
+                  </div>
+                </div>
+
+                {formData.price.amount && (
+                  <div className="price-preview">
+                    <span className="preview-label">Preview:</span>
+                    <span className="formatted-price">
+                      {new Intl.NumberFormat("en-IN", {
+                        style: "currency",
+                        currency: formData.price.currency || "INR",
+                      }).format(formData.price.amount)}
                     </span>
-                  </label>
-
-                  <div className="price-input-container">
-                    <div className="currency-wrapper">
-                      <select
-                        name="price.currency"
-                        value={formData.price.currency}
-                        onChange={handleInputChange}
-                        className="currency-select"
-                      >
-                        <option value="INR">🇮🇳 INR</option>
-                        <option value="USD">🇺🇸 USD</option>
-                        <option value="EUR">🇪🇺 EUR</option>
-                        <option value="GBP">🇬🇧 GBP</option>
-                        <option value="CAD">🇨🇦 CAD</option>
-                        <option value="AUD">🇦🇺 AUD</option>
-                      </select>
-                    </div>
-
-                    <div className="price-input-wrapper">
-                      <input
-                        id="price.amount"
-                        type="number"
-                        name="price.amount"
-                        value={formData.price.amount}
-                        onChange={handleInputChange}
-                        className={`price-input ${
-                          errors["price.amount"] ? "error" : ""
-                        }`}
-                        placeholder="0.00"
-                        min="0"
-                        step="0.01"
-                      />
-                      <div className="price-display">
-                        {formData.price.amount && (
-                          <span className="formatted-price">
-                            {new Intl.NumberFormat("en-IN", {
-                              style: "currency",
-                              currency: formData.price.currency || "INR",
-                            }).format(formData.price.amount)}
-                          </span>
-                        )}
-                      </div>
-                    </div>
                   </div>
+                )}
 
-                  {errors["price.amount"] && (
-                    <div className="field-error">
-                      <span className="error-icon">⚠️</span>
-                      {errors["price.amount"]}
+                {errors["price.amount"] && (
+                  <span className="super-field-error">{errors["price.amount"]}</span>
+                )}
+              </div>
+
+              <div className="super-form-row">
+                <div className="super-form-group">
+                  <label className="super-checkbox-label">
+                    <input
+                      type="checkbox"
+                      name="price.negotiable"
+                      checked={formData.price.negotiable}
+                      onChange={handleInputChange}
+                    />
+                    <span className="super-checkbox"></span>
+                    <div className="checkbox-content">
+                      <span className="checkbox-title">💬 Open to Negotiation</span>
+                      <span className="checkbox-desc">Allow buyers to make offers</span>
                     </div>
-                  )}
+                  </label>
                 </div>
 
-                {/* Pricing Options */}
-                <div className="pricing-options">
-                  <div className="pricing-row">
-                    <div className="option-group">
-                      <label className="modern-checkbox">
-                        <input
-                          type="checkbox"
-                          name="price.negotiable"
-                          checked={formData.price.negotiable}
-                          onChange={handleInputChange}
-                        />
-                        <span className="checkbox-custom"></span>
-                        <div className="checkbox-content">
-                          <span className="checkbox-title">
-                            💬 Open to Negotiation
-                          </span>
-                          <span className="checkbox-desc">
-                            Allow buyers to make offers
-                          </span>
-                        </div>
-                      </label>
-                    </div>
-
-                    <div className="option-group">
-                      <label htmlFor="quantity" className="quantity-label">
-                        <span className="label-text">
-                          📦 Quantity Available
-                        </span>
-                        <span className="label-hint">
-                          How many copies/pieces?
-                        </span>
-                      </label>
-                      <div className="quantity-input-wrapper">
-                        <button
-                          type="button"
-                          className="quantity-btn"
-                          onClick={() => {
-                            const newQty = Math.max(
-                              1,
-                              (formData.quantity || 1) - 1
-                            );
-                            handleInputChange({
-                              target: {
-                                name: "quantity",
-                                value: newQty,
-                                type: "number",
-                              },
-                            });
-                          }}
-                        >
-                          −
-                        </button>
-                        <input
-                          id="quantity"
-                          type="number"
-                          name="quantity"
-                          value={formData.quantity}
-                          onChange={handleInputChange}
-                          className="quantity-input"
-                          min="1"
-                          max="999"
-                        />
-                        <button
-                          type="button"
-                          className="quantity-btn"
-                          onClick={() => {
-                            const newQty = Math.min(
-                              999,
-                              (formData.quantity || 1) + 1
-                            );
-                            handleInputChange({
-                              target: {
-                                name: "quantity",
-                                value: newQty,
-                                type: "number",
-                              },
-                            });
-                          }}
-                        >
-                          +
-                        </button>
-                      </div>
-                    </div>
+                <div className="super-form-group">
+                  <label htmlFor="quantity" className="super-label">
+                    <span className="label-text">Quantity Available</span>
+                  </label>
+                  <div className="super-quantity-wrapper">
+                    <button
+                      type="button"
+                      className="quantity-btn decrease"
+                      onClick={() => {
+                        const newQty = Math.max(1, (formData.quantity || 1) - 1);
+                        handleInputChange({
+                          target: { name: "quantity", value: newQty, type: "number" },
+                        });
+                      }}
+                    >
+                      −
+                    </button>
+                    <input
+                      id="quantity"
+                      type="number"
+                      name="quantity"
+                      value={formData.quantity}
+                      onChange={handleInputChange}
+                      className="super-quantity-input"
+                      min="1"
+                      max="999"
+                    />
+                    <button
+                      type="button"
+                      className="quantity-btn increase"
+                      onClick={() => {
+                        const newQty = Math.min(999, (formData.quantity || 1) + 1);
+                        handleInputChange({
+                          target: { name: "quantity", value: newQty, type: "number" },
+                        });
+                      }}
+                    >
+                      +
+                    </button>
                   </div>
-
-                  {/* Price Suggestions */}
-                  {formData.category && (
-                    <div className="price-suggestions">
-                      <h4>💡 Pricing Suggestions</h4>
-                      <div className="suggestion-buttons">
-                        <button
-                          type="button"
-                          className="suggestion-btn"
-                          onClick={() =>
-                            handleInputChange({
-                              target: {
-                                name: "price.amount",
-                                value: "50",
-                                type: "number",
-                              },
-                            })
-                          }
-                        >
-                          ₹50 - Starter
-                        </button>
-                        <button
-                          type="button"
-                          className="suggestion-btn"
-                          onClick={() =>
-                            handleInputChange({
-                              target: {
-                                name: "price.amount",
-                                value: "150",
-                                type: "number",
-                              },
-                            })
-                          }
-                        >
-                          ₹150 - Popular
-                        </button>
-                        <button
-                          type="button"
-                          className="suggestion-btn"
-                          onClick={() =>
-                            handleInputChange({
-                              target: {
-                                name: "price.amount",
-                                value: "300",
-                                type: "number",
-                              },
-                            })
-                          }
-                        >
-                          ₹300 - Premium
-                        </button>
-                        <button
-                          type="button"
-                          className="suggestion-btn"
-                          onClick={() =>
-                            handleInputChange({
-                              target: {
-                                name: "price.amount",
-                                value: "500",
-                                type: "number",
-                              },
-                            })
-                          }
-                        >
-                          ₹500+ - Luxury
-                        </button>
-                      </div>
-                      <p className="suggestion-note">
-                        💡 These are general suggestions. Price based on your
-                        artwork's uniqueness, size, and market demand.
-                      </p>
-                    </div>
-                  )}
+                  <div className="help-text">
+                    <span className="help-icon">📦</span>
+                    How many copies or pieces are available?
+                  </div>
                 </div>
               </div>
+
+              {/* Price Suggestions */}
+              {formData.category && (
+                <div className="super-form-group">
+                  <label className="super-label">
+                    <span className="label-text">💡 Pricing Suggestions</span>
+                  </label>
+                  <div className="price-suggestions">
+                    <button
+                      type="button"
+                      className="suggestion-btn"
+                      onClick={() =>
+                        handleInputChange({
+                          target: { name: "price.amount", value: "50", type: "number" },
+                        })
+                      }
+                    >
+                      ₹50 - Starter
+                    </button>
+                    <button
+                      type="button"
+                      className="suggestion-btn"
+                      onClick={() =>
+                        handleInputChange({
+                          target: { name: "price.amount", value: "150", type: "number" },
+                        })
+                      }
+                    >
+                      ₹150 - Popular
+                    </button>
+                    <button
+                      type="button"
+                      className="suggestion-btn"
+                      onClick={() =>
+                        handleInputChange({
+                          target: { name: "price.amount", value: "300", type: "number" },
+                        })
+                      }
+                    >
+                      ₹300 - Premium
+                    </button>
+                    <button
+                      type="button"
+                      className="suggestion-btn"
+                      onClick={() =>
+                        handleInputChange({
+                          target: { name: "price.amount", value: "500", type: "number" },
+                        })
+                      }
+                    >
+                      ₹500+ - Luxury
+                    </button>
+                  </div>
+                  <div className="help-text">
+                    <span className="help-icon">💡</span>
+                    These are general suggestions. Price based on your artwork's uniqueness and market demand.
+                  </div>
+                </div>
+              )}
             </div>
           </>
         )}
 
         {currentStep === 2 && (
           <div className="step-content">
-            <div className="upload-mode-selector">
-              <h3>Upload Method</h3>
-              <div className="mode-buttons">
-                <button
-                  type="button"
-                  className={`mode-btn ${
-                    uploadMode === "files" ? "active" : ""
-                  }`}
-                  onClick={() => setUploadMode("files")}
-                >
-                  📁 Upload Files
-                </button>
-                <button
-                  type="button"
-                  className={`mode-btn ${
-                    uploadMode === "folder" ? "active" : ""
-                  }`}
-                  onClick={() => setUploadMode("folder")}
-                >
-                  📂 Upload Folder
-                </button>
+            <div className="super-form-section">
+              <div className="section-header">
+                <span className="section-icon">📁</span>
+                <h4>Upload Method</h4>
+                <span className="section-subtitle">Choose how to upload your artwork files</span>
+              </div>
+
+              <div className="upload-mode-selector">
+                <div className="mode-buttons">
+                  <button
+                    type="button"
+                    className={`super-mode-btn ${uploadMode === "files" ? "active" : ""}`}
+                    onClick={() => setUploadMode("files")}
+                  >
+                    <span className="mode-icon">📁</span>
+                    <div className="mode-content">
+                      <span className="mode-title">Upload Files</span>
+                      <span className="mode-desc">Select individual files</span>
+                    </div>
+                  </button>
+                  <button
+                    type="button"
+                    className={`super-mode-btn ${uploadMode === "folder" ? "active" : ""}`}
+                    onClick={() => setUploadMode("folder")}
+                  >
+                    <span className="mode-icon">📂</span>
+                    <div className="mode-content">
+                      <span className="mode-title">Upload Folder</span>
+                      <span className="mode-desc">Upload entire folder structure</span>
+                    </div>
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -567,97 +569,52 @@ const AddArtwork = () => {
               />
             )}
 
-            <div className="pricing-section">
-              <h3>Pricing & Availability</h3>
-
-              <div className="form-row">
-                <div className="form-group">
-                  <label htmlFor="price.amount">Price *</label>
-                  <div className="price-input">
-                    <select
-                      name="price.currency"
-                      value={formData.price.currency}
-                      onChange={handleInputChange}
-                      className="currency-select"
-                    >
-                      <option value="USD">USD</option>
-                      <option value="EUR">EUR</option>
-                      <option value="GBP">GBP</option>
-                      <option value="INR">INR</option>
-                    </select>
-                    <input
-                      id="price.amount"
-                      type="number"
-                      name="price.amount"
-                      value={formData.price.amount}
-                      onChange={handleInputChange}
-                      className={`form-input ${
-                        errors["price.amount"] ? "error" : ""
-                      }`}
-                      placeholder="0.00"
-                      min="0"
-                      step="0.01"
-                    />
-                  </div>
-                  {errors["price.amount"] && (
-                    <span className="field-error">
-                      {errors["price.amount"]}
-                    </span>
-                  )}
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="quantity">Quantity</label>
-                  <input
-                    id="quantity"
-                    type="number"
-                    name="quantity"
-                    value={formData.quantity}
-                    onChange={handleInputChange}
-                    className="form-input"
-                    min="1"
-                  />
-                </div>
+            <div className="super-form-section">
+              <div className="section-header">
+                <span className="section-icon">🚚</span>
+                <h4>Shipping & Additional Options</h4>
+                <span className="section-subtitle">Configure delivery and extra services</span>
               </div>
 
-              <div className="form-group">
-                <label className="checkbox-label">
-                  <input
-                    type="checkbox"
-                    name="price.negotiable"
-                    checked={formData.price.negotiable}
-                    onChange={handleInputChange}
-                  />
-                  Price is negotiable
-                </label>
-              </div>
-
-              <div className="form-group">
-                <label className="checkbox-label">
+              <div className="super-form-group">
+                <label className="super-checkbox-label">
                   <input
                     type="checkbox"
                     name="shipping.available"
                     checked={formData.shipping.available}
                     onChange={handleInputChange}
                   />
-                  Shipping available
+                  <span className="super-checkbox"></span>
+                  <div className="checkbox-content">
+                    <span className="checkbox-title">🚚 Shipping Available</span>
+                    <span className="checkbox-desc">Offer shipping to buyers</span>
+                  </div>
                 </label>
               </div>
 
               {formData.shipping.available && (
-                <div className="form-group">
-                  <label htmlFor="shipping.cost">Shipping Cost</label>
-                  <input
-                    id="shipping.cost"
-                    type="number"
-                    name="shipping.cost"
-                    value={formData.shipping.cost}
-                    onChange={handleInputChange}
-                    className="form-input"
-                    placeholder="0.00"
-                    min="0"
-                    step="0.01"
-                  />
+                <div className="super-form-group">
+                  <label htmlFor="shipping.cost" className="super-label">
+                    <span className="label-text">Shipping Cost</span>
+                  </label>
+                  <div className="input-wrapper">
+                    <input
+                      id="shipping.cost"
+                      type="number"
+                      name="shipping.cost"
+                      value={formData.shipping.cost}
+                      onChange={handleInputChange}
+                      className="super-form-input"
+                      placeholder="0.00"
+                      min="0"
+                      step="0.01"
+                    />
+                    <div className="input-icon">💰</div>
+                  </div>
+                  <div className="help-text">
+                    <span className="help-icon">💡</span>
+                    Set to 0 for free shipping
+                  </div>
                 </div>
               )}
             </div>
@@ -665,53 +622,63 @@ const AddArtwork = () => {
         )}
       </div>
 
-      <div className="add-artwork-actions">
-        {currentStep > 1 && (
-          <button
-            type="button"
-            onClick={handlePrevious}
-            className="btn btn-secondary"
-            disabled={loading}
-          >
-            ← Previous
-          </button>
-        )}
+      <div className="super-add-actions">
+        <div className="actions-container">
+          {currentStep > 1 && (
+            <button
+              type="button"
+              onClick={handlePrevious}
+              className="super-btn super-btn-secondary compact"
+              disabled={loading}
+            >
+              <span className="btn-icon">←</span>
+              <span className="btn-text">Previous</span>
+            </button>
+          )}
 
-        {currentStep < 2 ? (
-          <button
-            type="button"
-            onClick={handleNext}
-            className="btn btn-primary"
-          >
-            Next →
-          </button>
-        ) : (
-          <div className="final-actions">
-            <button
-              type="button"
-              onClick={() => handleSubmit(true)}
-              className="btn btn-secondary"
-              disabled={loading}
-            >
-              {loading ? "Saving..." : "Save as Draft"}
-            </button>
-            <button
-              type="button"
-              onClick={() => handleSubmit(false)}
-              className={`btn btn-primary ${loading ? "loading" : ""}`}
-              disabled={loading}
-            >
-              {loading ? (
-                <>
-                  <span className="spinner"></span>
-                  Publishing...
-                </>
-              ) : (
-                "Publish Artwork"
-              )}
-            </button>
+          <div className="actions-right">
+            {currentStep < 2 ? (
+              <button
+                type="button"
+                onClick={handleNext}
+                className="super-btn super-btn-primary compact"
+              >
+                <span className="btn-text">Next Step</span>
+                <span className="btn-icon">→</span>
+              </button>
+            ) : (
+              <div className="final-actions">
+                <button
+                  type="button"
+                  onClick={() => handleSubmit(true)}
+                  className="super-btn super-btn-draft compact"
+                  disabled={loading}
+                >
+                  <span className="btn-icon">📝</span>
+                  <span className="btn-text">{loading ? "Saving..." : "Save as Draft"}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleSubmit(false)}
+                  className={`super-btn super-btn-primary compact ${loading ? "loading" : ""}`}
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <>
+                      <span className="btn-spinner"></span>
+                      <span className="btn-text">Publishing...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="btn-icon">🚀</span>
+                      <span className="btn-text">Publish Artwork</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
