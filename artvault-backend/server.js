@@ -123,6 +123,7 @@ app.use("/api/auth", require("./routes/auth"));
 app.use("/api/artworks", require("./routes/artwork"));
 app.use("/api/orders", require("./routes/orders"));
 app.use("/api/notifications", require("./routes/notifications"));
+app.use("/api/analytics", require("./routes/analytics"));
 
 // Add logging middleware for file requests (before static serving)
 app.use("/uploads", (req, res, next) => {

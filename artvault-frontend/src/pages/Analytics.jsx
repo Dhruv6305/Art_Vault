@@ -1,85 +1,43 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
+import api from '../api/axios.js';
 import '../styles/Analytics.css';
-
-// Mock data for demonstration - replace with actual API calls
-const mockAnalyticsData = {
-    platformInsights: {
-        uploads: {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-            data: [45, 52, 48, 61, 55, 67]
-        },
-        growth: {
-            totalUsers: 1250,
-            monthlyGrowth: 12.5,
-            totalArtworks: 3420,
-            artworkGrowth: 8.3
-        },
-        engagement: {
-            labels: ['Views', 'Likes', 'Shares', 'Comments'],
-            data: [2340, 1890, 456, 234]
-        }
-    },
-    artistInsights: {
-        topArtists: [
-            { name: 'Sarah Chen', sales: 45, rating: 4.8, revenue: 12500 },
-            { name: 'Marcus Rivera', sales: 38, rating: 4.7, revenue: 9800 },
-            { name: 'Elena Volkov', sales: 32, rating: 4.9, revenue: 8900 },
-            { name: 'David Kim', sales: 28, rating: 4.6, revenue: 7200 },
-            { name: 'Isabella Torres', sales: 25, rating: 4.8, revenue: 6800 }
-        ],
-        salesTrend: {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-            data: [125, 142, 138, 165, 158, 189]
-        },
-        ratingDistribution: {
-            labels: ['5 Stars', '4 Stars', '3 Stars', '2 Stars', '1 Star'],
-            data: [65, 25, 8, 1, 1]
-        }
-    },
-    audienceInsights: {
-        geographic: {
-            labels: ['North America', 'Europe', 'Asia', 'South America', 'Africa', 'Oceania'],
-            data: [35, 28, 22, 8, 4, 3]
-        },
-        categoryTrends: {
-            labels: ['Digital Art', 'Photography', 'Paintings', '3D Models', 'Sculptures', 'Mixed Media'],
-            data: [32, 24, 18, 12, 8, 6]
-        },
-        ageGroups: {
-            labels: ['18-24', '25-34', '35-44', '45-54', '55+'],
-            data: [22, 35, 25, 12, 6]
-        }
-    }
-};
 
 const Analytics = () => {
     const { user, isAuthenticated } = useAuth();
     const [activeTab, setActiveTab] = useState('platform');
-    const [analyticsData, setAnalyticsData] = useState(mockAnalyticsData);
+    const [analyticsData, setAnalyticsData] = useState({
+        platformInsights: null,
+        artistInsights: null,
+        audienceInsights: null
+    });
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
-        if (isAuthenticated) {
-            fetchAnalyticsData();
-        }
-    }, [isAuthenticated]);
+        fetchAnalyticsData();
+    }, []);
 
     const fetchAnalyticsData = async () => {
         setLoading(true);
+        setError(null);
         try {
-            // Replace with actual API call
-            // const response = await fetch('/api/analytics');
-            // const data = await response.json();
-            // setAnalyticsData(data);
+            // Fetch all analytics data
+            const [platformResponse, artistResponse, audienceResponse] = await Promise.all([
+                api.get('/analytics/platform'),
+                api.get('/analytics/artists'),
+                api.get('/analytics/audience')
+            ]);
 
-            // Simulate API delay
-            setTimeout(() => {
-                setAnalyticsData(mockAnalyticsData);
-                setLoading(false);
-            }, 1000);
+            setAnalyticsData({
+                platformInsights: platformResponse.data.data,
+                artistInsights: artistResponse.data.data,
+                audienceInsights: audienceResponse.data.data
+            });
         } catch (error) {
             console.error('Error fetching analytics data:', error);
+            setError('Failed to load analytics data. Please try again.');
+        } finally {
             setLoading(false);
         }
     };
@@ -227,6 +185,30 @@ const Analytics = () => {
         );
     }
 
+    if (error) {
+        return (
+            <div className="analytics-page">
+                <div className="error-container">
+                    <h2>Error Loading Analytics</h2>
+                    <p>{error}</p>
+                    <button onClick={fetchAnalyticsData} className="retry-button">
+                        Retry
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    if (!analyticsData.platformInsights) {
+        return (
+            <div className="analytics-page">
+                <div className="loading-container">
+                    <p>No analytics data available.</p>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="analytics-page">
             <div className="analytics-header">
@@ -256,29 +238,33 @@ const Analytics = () => {
             </div>
 
             <div className="analytics-content">
-                {activeTab === 'platform' && (
+                {activeTab === 'platform' && analyticsData.platformInsights && (
                     <div className="platform-insights">
                         <div className="insights-grid">
                             <div className="metric-card">
                                 <h3>Total Users</h3>
                                 <div className="metric-value">{analyticsData.platformInsights.growth.totalUsers.toLocaleString()}</div>
-                                <div className="metric-change positive">+{analyticsData.platformInsights.growth.monthlyGrowth}%</div>
+                                <div className={`metric-change ${analyticsData.platformInsights.growth.monthlyGrowth >= 0 ? 'positive' : 'negative'}`}>
+                                    {analyticsData.platformInsights.growth.monthlyGrowth >= 0 ? '+' : ''}{analyticsData.platformInsights.growth.monthlyGrowth}%
+                                </div>
                             </div>
                             <div className="metric-card">
                                 <h3>Total Artworks</h3>
                                 <div className="metric-value">{analyticsData.platformInsights.growth.totalArtworks.toLocaleString()}</div>
-                                <div className="metric-change positive">+{analyticsData.platformInsights.growth.artworkGrowth}%</div>
+                                <div className={`metric-change ${analyticsData.platformInsights.growth.artworkGrowth >= 0 ? 'positive' : 'negative'}`}>
+                                    {analyticsData.platformInsights.growth.artworkGrowth >= 0 ? '+' : ''}{analyticsData.platformInsights.growth.artworkGrowth}%
+                                </div>
                             </div>
                         </div>
 
                         <div className="charts-grid">
                             {renderChart('line', analyticsData.platformInsights.uploads, 'Monthly Uploads')}
-                            {renderChart('bar', analyticsData.platformInsights.engagement, 'Engagement Overview')}
+                            {renderChart('bar', analyticsData.platformInsights.engagement, 'Platform Engagement')}
                         </div>
                     </div>
                 )}
 
-                {activeTab === 'artist' && (
+                {activeTab === 'artist' && analyticsData.artistInsights && (
                     <div className="artist-insights">
                         <div className="top-artists-section">
                             <h3>Top Performing Artists</h3>
@@ -289,14 +275,22 @@ const Analytics = () => {
                                     <span>Rating</span>
                                     <span>Revenue</span>
                                 </div>
-                                {analyticsData.artistInsights.topArtists.map((artist, index) => (
-                                    <div key={index} className="table-row">
-                                        <span className="artist-name">{artist.name}</span>
-                                        <span className="artist-sales">{artist.sales}</span>
-                                        <span className="artist-rating">⭐ {artist.rating}</span>
-                                        <span className="artist-revenue">${artist.revenue.toLocaleString()}</span>
+                                {analyticsData.artistInsights.topArtists.length > 0 ? (
+                                    analyticsData.artistInsights.topArtists.map((artist, index) => (
+                                        <div key={index} className="table-row">
+                                            <span className="artist-name">{artist.name}</span>
+                                            <span className="artist-sales">{artist.sales}</span>
+                                            <span className="artist-rating">⭐ {artist.rating}</span>
+                                            <span className="artist-revenue">${artist.revenue.toLocaleString()}</span>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="table-row">
+                                        <span style={{ gridColumn: '1 / -1', textAlign: 'center', color: 'var(--text-muted)' }}>
+                                            No sales data available yet
+                                        </span>
                                     </div>
-                                ))}
+                                )}
                             </div>
                         </div>
 
@@ -307,7 +301,7 @@ const Analytics = () => {
                     </div>
                 )}
 
-                {activeTab === 'audience' && (
+                {activeTab === 'audience' && analyticsData.audienceInsights && (
                     <div className="audience-insights">
                         <div className="charts-grid">
                             {renderChart('doughnut', analyticsData.audienceInsights.geographic, 'Geographic Distribution')}
