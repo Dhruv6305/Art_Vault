@@ -21,6 +21,7 @@ const Standard3DCanvas = ({
   const mountRef = useRef(null);
   const controlsRef = useRef(null);
   const sceneRef = useRef(null);
+  const initialCameraRef = useRef(null);
   const [status, setStatus] = useState("Ready to load");
   const [error, setError] = useState(null);
   const [modelInfo, setModelInfo] = useState(null);
@@ -47,34 +48,61 @@ const Standard3DCanvas = ({
         // Clear previous content
         mountRef.current.innerHTML = "";
 
+        // Get actual container dimensions
+        const containerWidth =
+          mountRef.current.parentElement?.clientWidth || width;
+        const containerHeight =
+          mountRef.current.parentElement?.clientHeight || height;
+
         // Basic scene setup
         scene = new THREE.Scene();
         scene.background = new THREE.Color(backgroundColor);
         sceneRef.current = scene;
 
-        // Camera
-        camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 2000);
+        // Camera with proper aspect ratio
+        camera = new THREE.PerspectiveCamera(
+          75,
+          containerWidth / containerHeight,
+          0.1,
+          2000
+        );
         camera.position.set(50, 50, 50);
 
-        // Renderer
-        renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(width, height);
+        // Renderer with proper sizing
+        renderer = new THREE.WebGLRenderer({
+          antialias: true,
+          alpha: false,
+        });
+
+        // Set canvas size attributes to match container exactly
+        renderer.setSize(containerWidth, containerHeight, true);
+        renderer.setPixelRatio(window.devicePixelRatio);
         renderer.setClearColor(backgroundColor);
         renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
+        // Force canvas to fill 100% of container
+        const canvas = renderer.domElement;
+        canvas.style.display = "block";
+        canvas.style.width = "100% !important";
+        canvas.style.height = "100% !important";
+        canvas.style.margin = "0";
+        canvas.style.padding = "0";
+
+        // Set canvas attributes to match container
+        canvas.width = containerWidth;
+        canvas.height = containerHeight;
+
         // Download protection
         if (preventDownload) {
-          renderer.domElement.addEventListener("contextmenu", (e) =>
-            e.preventDefault()
-          );
-          renderer.domElement.style.userSelect = "none";
-          renderer.domElement.style.webkitUserSelect = "none";
-          renderer.domElement.style.mozUserSelect = "none";
-          renderer.domElement.style.msUserSelect = "none";
+          canvas.addEventListener("contextmenu", (e) => e.preventDefault());
+          canvas.style.userSelect = "none";
+          canvas.style.webkitUserSelect = "none";
+          canvas.style.mozUserSelect = "none";
+          canvas.style.msUserSelect = "none";
         }
 
-        mountRef.current.appendChild(renderer.domElement);
+        mountRef.current.appendChild(canvas);
 
         // Enhanced lighting setup for better visibility
         const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
@@ -102,25 +130,17 @@ const Standard3DCanvas = ({
         controls.enablePan = false; // Disable panning for security
         controlsRef.current = controls;
 
-        // Click handler for modal
-        const onClick = (event) => {
-          if (onModelClick) {
-            // Only trigger if not dragging
-            if (controls && !controls.isDragging) {
-              event.preventDefault();
-              event.stopPropagation();
-              onModelClick(event);
-            }
-          }
-        };
-
-        // Add click listener
-        renderer.domElement.addEventListener("click", onClick);
-
         setStatus("Loading 3D model...");
 
-        // Load model with camera reference
-        await loadModel(fileUrl, scene, camera, controls);
+        // Load model with camera reference and container dimensions
+        await loadModel(
+          fileUrl,
+          scene,
+          camera,
+          controls,
+          containerWidth,
+          containerHeight
+        );
 
         // Animation loop
         const animate = () => {
@@ -148,8 +168,38 @@ const Standard3DCanvas = ({
 
     init();
 
+    // Add resize observer for dynamic sizing
+    let resizeObserver;
+    if (mountRef.current && mountRef.current.parentElement) {
+      resizeObserver = new ResizeObserver((entries) => {
+        if (!camera || !renderer) return;
+
+        const entry = entries[0];
+        if (entry) {
+          const newWidth = entry.contentRect.width;
+          const newHeight = entry.contentRect.height;
+
+          if (newWidth > 0 && newHeight > 0) {
+            camera.aspect = newWidth / newHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(newWidth, newHeight, true);
+
+            // Update canvas attributes
+            const canvas = renderer.domElement;
+            canvas.width = newWidth;
+            canvas.height = newHeight;
+          }
+        }
+      });
+
+      resizeObserver.observe(mountRef.current.parentElement);
+    }
+
     // Cleanup
     return () => {
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+      }
       if (animationId) {
         cancelAnimationFrame(animationId);
       }
@@ -160,9 +210,16 @@ const Standard3DCanvas = ({
         mountRef.current.innerHTML = "";
       }
     };
-  }, [fileUrl, autoRotateEnabled, wireframeMode]);
+  }, [fileUrl, autoRotateEnabled, width, height]);
 
-  const loadModel = async (url, scene, camera, controls) => {
+  const loadModel = async (
+    url,
+    scene,
+    camera,
+    controls,
+    containerWidth,
+    containerHeight
+  ) => {
     try {
       if (!url) {
         throw new Error("No model URL provided");
@@ -360,17 +417,18 @@ const Standard3DCanvas = ({
             `🎯 Material enhancement complete: ${materialCount} materials, ${textureCount} textures, ${preservedCount} preserved, ${enhancedCount} enhanced`
           );
 
-          // STANDARDIZED AUTO-SCALING - All models same relative size
+          // Get original model dimensions BEFORE scaling
           const box = new THREE.Box3().setFromObject(model);
           const size = box.getSize(new THREE.Vector3());
           const center = box.getCenter(new THREE.Vector3());
           const maxDim = Math.max(size.x, size.y, size.z);
 
-          // Apply model scale
+          // Apply FIXED model scale (independent of canvas size)
           if (modelScale !== 1) {
             model.scale.setScalar(modelScale);
           } else {
             // CONSISTENT SCALING - Target size of 5 units for all models
+            // This scale is FIXED and won't change with canvas size
             const targetSize = 5;
             const scaleFactor = targetSize / maxDim;
             model.scale.setScalar(scaleFactor);
@@ -381,21 +439,35 @@ const Standard3DCanvas = ({
             );
           }
 
-          // Center the model
+          // Center the model at origin
           model.position.sub(center);
           scene.add(model);
 
-          // Position camera to see the model
+          // Calculate bounding sphere AFTER scaling
           const newBox = new THREE.Box3().setFromObject(model);
           const newSize = newBox.getSize(new THREE.Vector3());
-          const newMaxDim = Math.max(newSize.x, newSize.y, newSize.z);
 
-          // Calculate optimal camera position
           const boundingSphere = new THREE.Sphere();
           newBox.getBoundingSphere(boundingSphere);
-
           const sphereRadius = boundingSphere.radius;
-          const distance = sphereRadius * 3; // Good viewing distance
+
+          // CAMERA POSITIONING - Adjust based on canvas aspect ratio
+          // Calculate distance to fit model in view
+          const fov = camera.fov * (Math.PI / 180); // Convert to radians
+          const aspectRatio = containerWidth / containerHeight;
+
+          // Calculate distance needed to fit the model
+          let distance;
+          if (aspectRatio > 1) {
+            // Wider canvas - use height as constraint
+            distance = sphereRadius / Math.tan(fov / 2);
+          } else {
+            // Taller canvas - use width as constraint
+            distance = sphereRadius / (Math.tan(fov / 2) * aspectRatio);
+          }
+
+          // Add some padding (multiply by 1.5 for comfortable view)
+          distance *= 1.5;
 
           // Set camera position if not provided
           if (!cameraPosition) {
@@ -408,7 +480,13 @@ const Standard3DCanvas = ({
           controls.target.copy(boundingSphere.center);
           controls.update();
 
-          // Configure controls based on model size
+          // Store initial camera position for reset
+          initialCameraRef.current = {
+            position: camera.position.clone(),
+            target: boundingSphere.center.clone(),
+          };
+
+          // Configure controls based on model size (not canvas size)
           controls.minDistance = sphereRadius * 0.5;
           controls.maxDistance = sphereRadius * 10;
 
@@ -462,25 +540,33 @@ const Standard3DCanvas = ({
   };
 
   const toggleWireframe = () => {
-    setWireframeMode(!wireframeMode);
+    const newWireframeMode = !wireframeMode;
+    setWireframeMode(newWireframeMode);
     if (sceneRef.current) {
       sceneRef.current.traverse((child) => {
         if (child.isMesh && child.material) {
-          child.material.wireframe = !wireframeMode;
+          if (Array.isArray(child.material)) {
+            child.material.forEach((mat) => {
+              mat.wireframe = newWireframeMode;
+              mat.needsUpdate = true;
+            });
+          } else {
+            child.material.wireframe = newWireframeMode;
+            child.material.needsUpdate = true;
+          }
         }
       });
     }
   };
 
   const resetCamera = () => {
-    if (controlsRef.current && modelInfo) {
+    if (controlsRef.current && initialCameraRef.current) {
       const camera = controlsRef.current.object;
-      const center = new THREE.Vector3(0, 0, 0);
-      const distance = parseFloat(modelInfo.boundingSphere) * 3;
 
-      camera.position.set(distance * 0.7, distance * 0.7, distance * 0.7);
-      camera.lookAt(center);
-      controlsRef.current.target.copy(center);
+      // Restore to initial position
+      camera.position.copy(initialCameraRef.current.position);
+      camera.lookAt(initialCameraRef.current.target);
+      controlsRef.current.target.copy(initialCameraRef.current.target);
       controlsRef.current.update();
     }
   };
@@ -491,19 +577,26 @@ const Standard3DCanvas = ({
 
   return (
     <div
-      style={{ position: "relative", display: "inline-block", ...style }}
+      style={{
+        position: "relative",
+        display: style?.width === "100%" ? "block" : "inline-block",
+        width: style?.width || "auto",
+        height: style?.height || "auto",
+        ...style,
+      }}
       className={className}
     >
       {/* Main viewer container */}
       <div
         style={{
           position: "relative",
-          width: `${width}px`,
-          height: `${height}px`,
+          width: style?.width === "100%" ? "100%" : `${width}px`,
+          height: style?.height === "100%" ? "100%" : `${height}px`,
           border: "2px solid #4ecdc4",
           borderRadius: "8px",
           overflow: "hidden",
           backgroundColor: backgroundColor,
+          boxSizing: "border-box",
         }}
       >
         <div
@@ -511,6 +604,8 @@ const Standard3DCanvas = ({
           style={{
             width: "100%",
             height: "100%",
+            display: "block",
+            lineHeight: 0,
           }}
         />
 
@@ -569,6 +664,7 @@ const Standard3DCanvas = ({
               display: "flex",
               flexDirection: "column",
               gap: "5px",
+              zIndex: 100,
             }}
           >
             <button
@@ -645,22 +741,24 @@ const Standard3DCanvas = ({
           </div>
         )}
 
-        {/* Status indicator */}
-        <div
-          style={{
-            position: "absolute",
-            bottom: "10px",
-            left: "10px",
-            padding: "4px 8px",
-            backgroundColor: "rgba(0,0,0,0.7)",
-            color: error ? "#ff6b6b" : "#4ecdc4",
-            borderRadius: "4px",
-            fontSize: "10px",
-            maxWidth: "200px",
-          }}
-        >
-          {fileName} • {status}
-        </div>
+        {/* Status indicator - only show during loading or errors */}
+        {(status.includes("Loading") || error) && (
+          <div
+            style={{
+              position: "absolute",
+              bottom: "10px",
+              left: "10px",
+              padding: "4px 8px",
+              backgroundColor: "rgba(0,0,0,0.8)",
+              color: error ? "#ff6b6b" : "#4ecdc4",
+              borderRadius: "4px",
+              fontSize: "10px",
+              maxWidth: "200px",
+            }}
+          >
+            {error || status}
+          </div>
+        )}
 
         {/* Camera position display */}
         {showCoordinatePanel && (
@@ -685,85 +783,6 @@ const Standard3DCanvas = ({
             <div>Z: {currentCameraPos.z}</div>
           </div>
         )}
-      </div>
-
-      {/* Model Information - Optional */}
-      {showInfo && modelInfo && (
-        <div
-          style={{
-            marginTop: "10px",
-            padding: "10px",
-            backgroundColor: "#1a1a1a",
-            borderRadius: "6px",
-            fontSize: "11px",
-            border: "1px solid #4ecdc4",
-            maxWidth: `${width}px`,
-          }}
-        >
-          <div
-            style={{
-              fontWeight: "bold",
-              marginBottom: "8px",
-              color: "#4ecdc4",
-            }}
-          >
-            📐 Model Analysis
-          </div>
-
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr 1fr",
-              gap: "8px",
-              fontSize: "10px",
-            }}
-          >
-            <div>
-              <div style={{ color: "#ffa500", fontWeight: "bold" }}>
-                📏 Size
-              </div>
-              <div>
-                {modelInfo.dimensions.width} × {modelInfo.dimensions.height} ×{" "}
-                {modelInfo.dimensions.depth}
-              </div>
-              <div>{modelInfo.meshes} meshes</div>
-              <div>{modelInfo.vertices.toLocaleString()} vertices</div>
-            </div>
-            <div>
-              <div style={{ color: "#00ffff", fontWeight: "bold" }}>
-                🔧 Format
-              </div>
-              <div>Type: {modelInfo.format}</div>
-              <div>File: {fileName}</div>
-              <div>Sphere: {modelInfo.boundingSphere}</div>
-            </div>
-            <div>
-              <div style={{ color: "#ff69b4", fontWeight: "bold" }}>
-                📷 Camera
-              </div>
-              <div>
-                Position: {currentCameraPos.x}, {currentCameraPos.y},{" "}
-                {currentCameraPos.z}
-              </div>
-              <div>Auto-rotate: {autoRotateEnabled ? "ON" : "OFF"}</div>
-              <div>Wireframe: {wireframeMode ? "ON" : "OFF"}</div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Controls help */}
-      <div
-        style={{
-          marginTop: "5px",
-          fontSize: "10px",
-          opacity: 0.7,
-          maxWidth: `${width}px`,
-          color: "#999",
-        }}
-      >
-        • Drag to rotate • Scroll to zoom • Enhanced 3D viewer with full format
-        support
       </div>
     </div>
   );

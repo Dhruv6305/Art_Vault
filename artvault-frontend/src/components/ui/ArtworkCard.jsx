@@ -16,43 +16,51 @@ const ArtworkCard = React.memo(({ artwork, showActions = true }) => {
   const primaryFile =
     artwork.files?.find((file) => file.isPrimary) || artwork.files?.[0];
 
-  const handleLike = useCallback(async (e) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleLike = useCallback(
+    async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
 
-    if (!user) {
-      alert("Please log in to like artworks");
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const response = await api.post(`/artworks/${artwork._id}/like`);
-
-      if (response.data.success) {
-        setLiked(response.data.liked);
-        setLikesCount(response.data.likesCount);
+      if (!user) {
+        alert("Please log in to like artworks");
+        return;
       }
-    } catch (err) {
-      console.error("Like error:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, [user, artwork._id]);
+
+      setLoading(true);
+      try {
+        const response = await api.post(`/artworks/${artwork._id}/like`);
+
+        if (response.data.success) {
+          setLiked(response.data.liked);
+          setLikesCount(response.data.likesCount);
+        }
+      } catch (err) {
+        console.error("Like error:", err);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [user, artwork._id]
+  );
 
   // Memoize price formatter for better performance
-  const priceFormatter = useMemo(() => new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
-  }), []);
+  const priceFormatter = useMemo(
+    () =>
+      new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2,
+      }),
+    []
+  );
 
-  const formatPrice = useCallback((price) => {
-    return priceFormatter.format(price.amount);
-  }, [priceFormatter]);
-
-
+  const formatPrice = useCallback(
+    (price) => {
+      return priceFormatter.format(price.amount);
+    },
+    [priceFormatter]
+  );
 
   const getFilePreview = (file) => {
     if (!file) return null;
@@ -61,8 +69,6 @@ const ArtworkCard = React.memo(({ artwork, showActions = true }) => {
     const fileUrl = file.url.startsWith("http")
       ? file.url
       : `http://localhost:5000/${file.url}`;
-
-
 
     // Check if it's a 3D model by file type OR file extension
     const is3DModel =
@@ -73,17 +79,36 @@ const ArtworkCard = React.memo(({ artwork, showActions = true }) => {
 
     if (is3DModel) {
       return (
-        <div 
+        <div
           className="artwork-3d-preview-placeholder"
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
             setShowThreeDModal(true);
           }}
+          style={{ position: "relative" }}
         >
           <div className="artwork-3d-icon">🎮</div>
           <div className="artwork-3d-text">3D Model</div>
           <div className="artwork-3d-subtitle">Click to view</div>
+          <div
+            style={{
+              position: "absolute",
+              top: "10px",
+              right: "10px",
+              backgroundColor: "rgba(138, 43, 226, 0.9)",
+              color: "#fff",
+              padding: "4px 10px",
+              borderRadius: "4px",
+              fontSize: "11px",
+              fontWeight: "bold",
+              display: "flex",
+              alignItems: "center",
+              gap: "5px",
+            }}
+          >
+            <span>🎮</span> 3D MODEL
+          </div>
         </div>
       );
     }
@@ -91,34 +116,122 @@ const ArtworkCard = React.memo(({ artwork, showActions = true }) => {
     switch (file.type) {
       case "image":
         return (
-          <img
-            src={fileUrl}
-            alt={artwork.title}
-            className="artwork-image"
-            loading="lazy"
-            decoding="async"
-            onError={() => {
-              console.error("Image failed to load:", fileUrl);
-            }}
-          />
+          <div style={{ position: "relative", width: "100%", height: "100%" }}>
+            <img
+              src={fileUrl}
+              alt={artwork.title}
+              className="artwork-image"
+              loading="lazy"
+              decoding="async"
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+              }}
+              onError={() => {
+                console.error("Image failed to load:", fileUrl);
+              }}
+            />
+            <div
+              style={{
+                position: "absolute",
+                top: "10px",
+                right: "10px",
+                backgroundColor: "rgba(78, 205, 196, 0.9)",
+                color: "#000",
+                padding: "4px 10px",
+                borderRadius: "4px",
+                fontSize: "11px",
+                fontWeight: "bold",
+                display: "flex",
+                alignItems: "center",
+                gap: "5px",
+              }}
+            >
+              <span>🖼️</span> IMAGE
+            </div>
+          </div>
         );
       case "video":
         return (
-          <video
-            src={fileUrl}
-            className="artwork-video"
-            controls={false}
-            muted
-            preload="none"
-            poster={`${fileUrl}#t=1`}
-            onError={() => {
-              console.error("Video failed to load:", fileUrl);
+          <div
+            className="artwork-video-preview"
+            style={{
+              position: "relative",
+              width: "100%",
+              height: "100%",
+              backgroundColor: "#000",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
             }}
-          />
+          >
+            <video
+              src={fileUrl}
+              className="artwork-video"
+              controls={false}
+              muted
+              preload="metadata"
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+              }}
+              onError={() => {
+                console.error("Video failed to load:", fileUrl);
+              }}
+            />
+            <div
+              style={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                backgroundColor: "rgba(0, 0, 0, 0.7)",
+                borderRadius: "50%",
+                width: "60px",
+                height: "60px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                border: "3px solid #fff",
+                pointerEvents: "none",
+              }}
+            >
+              <div
+                style={{
+                  width: 0,
+                  height: 0,
+                  borderLeft: "20px solid #fff",
+                  borderTop: "12px solid transparent",
+                  borderBottom: "12px solid transparent",
+                  marginLeft: "5px",
+                }}
+              />
+            </div>
+            <div
+              style={{
+                position: "absolute",
+                bottom: "10px",
+                right: "10px",
+                backgroundColor: "rgba(0, 0, 0, 0.8)",
+                color: "#fff",
+                padding: "4px 8px",
+                borderRadius: "4px",
+                fontSize: "12px",
+                fontWeight: "bold",
+              }}
+            >
+              🎬 VIDEO
+            </div>
+          </div>
         );
       case "audio":
         return (
-          <div className="artwork-audio-preview">
+          <div
+            className="artwork-audio-preview"
+            style={{ position: "relative" }}
+          >
             <div className="audio-icon">🎵</div>
             <div className="audio-info">
               <span className="audio-title">{artwork.title}</span>
@@ -135,13 +248,52 @@ const ArtworkCard = React.memo(({ artwork, showActions = true }) => {
               controls
               style={{ width: "100%", marginTop: "0.5rem" }}
             />
+            <div
+              style={{
+                position: "absolute",
+                top: "10px",
+                right: "10px",
+                backgroundColor: "rgba(255, 165, 0, 0.9)",
+                color: "#000",
+                padding: "4px 10px",
+                borderRadius: "4px",
+                fontSize: "11px",
+                fontWeight: "bold",
+                display: "flex",
+                alignItems: "center",
+                gap: "5px",
+              }}
+            >
+              <span>🎵</span> AUDIO
+            </div>
           </div>
         );
       default:
         return (
-          <div className="artwork-document-preview">
+          <div
+            className="artwork-document-preview"
+            style={{ position: "relative" }}
+          >
             <div className="document-icon">📄</div>
             <span className="document-name">{file.filename}</span>
+            <div
+              style={{
+                position: "absolute",
+                top: "10px",
+                right: "10px",
+                backgroundColor: "rgba(128, 128, 128, 0.9)",
+                color: "#fff",
+                padding: "4px 10px",
+                borderRadius: "4px",
+                fontSize: "11px",
+                fontWeight: "bold",
+                display: "flex",
+                alignItems: "center",
+                gap: "5px",
+              }}
+            >
+              <span>📄</span> DOCUMENT
+            </div>
           </div>
         );
     }
@@ -205,9 +357,10 @@ const ArtworkCard = React.memo(({ artwork, showActions = true }) => {
             <h3 className="artwork-title">{artwork.title}</h3>
             <p className="artwork-artist">
               by {artwork.artistName}
-              {user && (user.id === artwork.artist || user._id === artwork.artist) && (
-                <span className="owner-badge">👑 Your Art</span>
-              )}
+              {user &&
+                (user.id === artwork.artist || user._id === artwork.artist) && (
+                  <span className="owner-badge">👑 Your Art</span>
+                )}
             </p>
 
             <div className="artwork-details">

@@ -3,7 +3,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import PaymentModal from "../components/payment/PaymentModal.jsx";
 import Standard3DCanvas from "../components/3d/Standard3DCanvas.jsx";
-import ThreeDModelModal from "../components/3d/ThreeDModelModal.jsx";
 import api from "../api/axios.js";
 
 // Enhanced Image component with better fallback and debugging
@@ -50,10 +49,10 @@ const ImageWithFallback = ({ src, alt, className, fallbackText }) => {
       <img
         src={src}
         alt={alt}
-        className={`${className} ${imageLoading ? 'loading' : 'loaded'}`}
+        className={`${className} ${imageLoading ? "loading" : "loaded"}`}
         onLoad={handleImageLoad}
         onError={handleImageError}
-        style={{ display: imageLoading ? 'none' : 'block' }}
+        style={{ display: imageLoading ? "none" : "block" }}
       />
     </div>
   );
@@ -72,7 +71,6 @@ const ArtworkDetail = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [currentQuantity, setCurrentQuantity] = useState(null);
-  const [showThreeDModal, setShowThreeDModal] = useState(false);
   const [windowDimensions, setWindowDimensions] = useState({
     width: window.innerWidth,
     height: window.innerHeight,
@@ -105,7 +103,7 @@ const ArtworkDetail = () => {
         setCurrentQuantity(response.data.artwork.quantity);
         setLiked(
           response.data.artwork.likes?.some((like) => like.user === user?.id) ||
-          false
+            false
         );
         setLikesCount(response.data.artwork.likes?.length || 0);
       } else {
@@ -187,9 +185,7 @@ const ArtworkDetail = () => {
             backgroundColor="#1a1a1a"
             showInfo={true}
             preventDownload={true}
-            onModelClick={() => {
-              setShowThreeDModal(true);
-            }}
+            onModelClick={null}
             style={{
               cursor: "grab",
               borderRadius: "8px",
@@ -216,28 +212,142 @@ const ArtworkDetail = () => {
         );
       case "video":
         return (
-          <video
+          <div
             key={index}
-            src={fileUrl}
-            className="artwork-detail-video"
-            controls
-            onError={() => {
-              console.error("Video failed to load:", fileUrl);
+            className="artwork-detail-video-container"
+            style={{
+              width: "100%",
+              maxWidth: "1200px",
+              margin: "30px auto",
+              borderRadius: "12px",
+              overflow: "hidden",
+              boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
+              border: "2px solid #4ecdc4",
+              backgroundColor: "#000",
             }}
-          />
+          >
+            <div
+              style={{
+                position: "relative",
+                width: "100%",
+                paddingTop: "56.25%", // 16:9 aspect ratio
+                backgroundColor: "#000",
+              }}
+            >
+              <video
+                src={fileUrl}
+                className="artwork-detail-video"
+                controls
+                controlsList="nodownload"
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "contain",
+                }}
+                onError={() => {
+                  console.error("Video failed to load:", fileUrl);
+                }}
+              />
+            </div>
+            <div
+              style={{
+                padding: "12px 20px",
+                backgroundColor: "rgba(0,0,0,0.9)",
+                color: "#fff",
+                fontSize: "14px",
+                borderTop: "1px solid #333",
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+              }}
+            >
+              <span style={{ color: "#4ecdc4", fontSize: "18px" }}>🎬</span>
+              <span style={{ fontWeight: "500" }}>
+                {file.filename || "Video"}
+              </span>
+            </div>
+          </div>
         );
       case "audio":
         return (
-          <div key={index} className="artwork-detail-audio">
-            <div className="audio-icon">🎵</div>
+          <div
+            key={index}
+            className="artwork-detail-audio"
+            style={{
+              width: "90%",
+              maxWidth: "min(1000px, 85vw)",
+              margin: "20px auto",
+              padding: "clamp(20px, 3vw, 40px)",
+              borderRadius: "12px",
+              backgroundColor: "#1a1a1a",
+              border: "2px solid #4ecdc4",
+              boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "clamp(15px, 2vw, 25px)",
+                marginBottom: "clamp(15px, 2vw, 25px)",
+              }}
+            >
+              <div
+                style={{
+                  fontSize: "clamp(40px, 5vw, 60px)",
+                  background: "linear-gradient(135deg, #4ecdc4, #44a3a0)",
+                  borderRadius: "50%",
+                  width: "clamp(70px, 8vw, 100px)",
+                  height: "clamp(70px, 8vw, 100px)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  boxShadow: "0 4px 16px rgba(78, 205, 196, 0.3)",
+                  flexShrink: 0,
+                }}
+              >
+                🎵
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div
+                  style={{
+                    color: "#fff",
+                    fontSize: "clamp(16px, 2vw, 22px)",
+                    fontWeight: "600",
+                    marginBottom: "5px",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {file.filename || "Audio File"}
+                </div>
+                <div
+                  style={{
+                    color: "#888",
+                    fontSize: "clamp(12px, 1.5vw, 16px)",
+                  }}
+                >
+                  Audio Track
+                </div>
+              </div>
+            </div>
             <audio
               src={fileUrl}
               controls
+              controlsList="nodownload"
+              style={{
+                width: "100%",
+                height: "clamp(45px, 5vh, 60px)",
+                borderRadius: "8px",
+              }}
               onError={() => {
                 console.error("Audio failed to load:", fileUrl);
               }}
             />
-            <span className="audio-filename">{file.filename}</span>
           </div>
         );
       default:
@@ -276,7 +386,10 @@ const ArtworkDetail = () => {
         <div className="error-container">
           <h2>Error Loading Artwork</h2>
           <p>{error}</p>
-          <button onClick={() => window.location.reload()} className="retry-btn">
+          <button
+            onClick={() => window.location.reload()}
+            className="retry-btn"
+          >
             🔄 Retry
           </button>
         </div>
@@ -292,7 +405,9 @@ const ArtworkDetail = () => {
         </button>
         <div className="error-container">
           <h2>Artwork Not Found</h2>
-          <p>The artwork you're looking for doesn't exist or has been removed.</p>
+          <p>
+            The artwork you're looking for doesn't exist or has been removed.
+          </p>
         </div>
       </div>
     );
@@ -339,7 +454,14 @@ const ArtworkDetail = () => {
                 <h4>3D Models ({threeDFiles.length})</h4>
                 <div className="models-grid">
                   {threeDFiles.map((file, index) => (
-                    <div key={index} className="model-item">
+                    <div
+                      key={index}
+                      className="model-item"
+                      style={{
+                        position: "relative",
+                        marginBottom: "20px",
+                      }}
+                    >
                       <Standard3DCanvas
                         fileUrl={
                           file.url.startsWith("http")
@@ -347,14 +469,23 @@ const ArtworkDetail = () => {
                             : `http://localhost:5000/${file.url}`
                         }
                         fileName={file.filename}
-                        width={Math.max(windowDimensions.width * 0.5, 640)}
-                        height={Math.max(windowDimensions.height * 0.25, 240)}
+                        width={Math.min(
+                          Math.max(windowDimensions.width * 0.45, 500),
+                          900
+                        )}
+                        height={Math.min(
+                          Math.max(windowDimensions.height * 0.4, 400),
+                          600
+                        )}
                         showControls={true}
                         autoRotate={index > 0}
                         backgroundColor="#1a1a1a"
-                        showInfo={true}
+                        showInfo={false}
                         preventDownload={true}
                         onModelClick={() => {
+                          console.log(
+                            "Double-click detected - opening fullscreen modal"
+                          );
                           setShowThreeDModal(true);
                         }}
                         style={{
@@ -367,11 +498,29 @@ const ArtworkDetail = () => {
                               : "2px solid #333",
                         }}
                       />
-                      <div className="model-info">
-                        <span className="model-filename">{file.filename}</span>
-                        {index === 0 && (
-                          <span className="primary-badge">Primary</span>
-                        )}
+                      <div
+                        className="model-info"
+                        style={{
+                          marginTop: "10px",
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          padding: "8px 12px",
+                          backgroundColor: "#1a1a1a",
+                          borderRadius: "6px",
+                          border: "1px solid #333",
+                        }}
+                      >
+                        <span
+                          className="model-filename"
+                          style={{
+                            color: "#fff",
+                            fontSize: "12px",
+                            fontWeight: "500",
+                          }}
+                        >
+                          {file.filename}
+                        </span>
                       </div>
                     </div>
                   ))}
@@ -384,9 +533,11 @@ const ArtworkDetail = () => {
           {threeDFiles.length === 0 && imageFiles.length > 0 && (
             <div className="main-image-container">
               <ImageWithFallback
-                src={imageFiles[currentImageIndex]?.url.startsWith("http")
-                  ? imageFiles[currentImageIndex]?.url
-                  : `http://localhost:5000/${imageFiles[currentImageIndex]?.url}`}
+                src={
+                  imageFiles[currentImageIndex]?.url.startsWith("http")
+                    ? imageFiles[currentImageIndex]?.url
+                    : `http://localhost:5000/${imageFiles[currentImageIndex]?.url}`
+                }
                 alt={artwork.title}
                 className="main-artwork-image"
                 fallbackText={`Artwork: ${artwork.title}`}
@@ -403,8 +554,9 @@ const ArtworkDetail = () => {
                           : `http://localhost:5000/${file.url}`
                       }
                       alt={`${artwork.title} ${index + 1}`}
-                      className={`thumbnail ${index === currentImageIndex ? "active" : ""
-                        }`}
+                      className={`thumbnail ${
+                        index === currentImageIndex ? "active" : ""
+                      }`}
                       onClick={() => setCurrentImageIndex(index)}
                       onError={(e) => {
                         console.error(
@@ -460,13 +612,15 @@ const ArtworkDetail = () => {
           )}
 
           {/* Fallback when no media files */}
-          {threeDFiles.length === 0 && imageFiles.length === 0 && otherFiles.length === 0 && (
-            <div className="no-media-fallback">
-              <div className="no-media-icon">🖼️</div>
-              <h3>No Media Files</h3>
-              <p>This artwork doesn't have any associated media files.</p>
-            </div>
-          )}
+          {threeDFiles.length === 0 &&
+            imageFiles.length === 0 &&
+            otherFiles.length === 0 && (
+              <div className="no-media-fallback">
+                <div className="no-media-icon">🖼️</div>
+                <h3>No Media Files</h3>
+                <p>This artwork doesn't have any associated media files.</p>
+              </div>
+            )}
         </div>
 
         <div className="artwork-info-section">
@@ -474,11 +628,13 @@ const ArtworkDetail = () => {
             <h1 className="artwork-title">{artwork.title}</h1>
             <p className="artwork-artist">
               by {artwork.artistName}
-              {user && (user.id === artwork.artist || user._id === artwork.artist || user.id === artwork.artist?._id || user._id === artwork.artist?._id) && (
-                <span className="artwork-owner-badge">
-                  👑 Your Artwork
-                </span>
-              )}
+              {user &&
+                (user.id === artwork.artist ||
+                  user._id === artwork.artist ||
+                  user.id === artwork.artist?._id ||
+                  user._id === artwork.artist?._id) && (
+                  <span className="artwork-owner-badge">👑 Your Artwork</span>
+                )}
             </p>
 
             <div className="artwork-actions">
@@ -581,7 +737,10 @@ const ArtworkDetail = () => {
                 <div className="stat-item">
                   <span className="stat-icon">📦</span>
                   <span className="stat-value">
-                    {currentQuantity !== null ? currentQuantity : artwork.quantity} available
+                    {currentQuantity !== null
+                      ? currentQuantity
+                      : artwork.quantity}{" "}
+                    available
                   </span>
                 </div>
               )}
@@ -589,7 +748,11 @@ const ArtworkDetail = () => {
           </div>
 
           <div className="contact-artist-section">
-            {user && (user.id === artwork.artist || user._id === artwork.artist || user.id === artwork.artist?._id || user._id === artwork.artist?._id) ? (
+            {user &&
+            (user.id === artwork.artist ||
+              user._id === artwork.artist ||
+              user.id === artwork.artist?._id ||
+              user._id === artwork.artist?._id) ? (
               <div className="owner-actions">
                 <button
                   className="edit-artwork-btn"
@@ -606,9 +769,7 @@ const ArtworkDetail = () => {
               </div>
             ) : (
               <div className="buyer-actions">
-                <button className="contact-btn">
-                  📧 Contact Artist
-                </button>
+                <button className="contact-btn">📧 Contact Artist</button>
                 <button
                   className="buy-now-btn"
                   onClick={() => setShowPaymentModal(true)}
@@ -634,7 +795,9 @@ const ArtworkDetail = () => {
                 <h3>Price</h3>
               </div>
               <div className="price-content">
-                <span className="price-amount-bottom">{formatPrice(artwork.price)}</span>
+                <span className="price-amount-bottom">
+                  {formatPrice(artwork.price)}
+                </span>
                 {artwork.price.negotiable && (
                   <span className="price-negotiable-bottom">Negotiable</span>
                 )}
@@ -646,11 +809,18 @@ const ArtworkDetail = () => {
                 </div>
               )}
 
-              {(currentQuantity || artwork.quantity) <= 5 && (currentQuantity || artwork.quantity) > 0 && (
-                <div className="low-stock-notice-bottom">
-                  <span className="low-stock-warning">⚠️ Limited stock - Only {currentQuantity !== null ? currentQuantity : artwork.quantity} left!</span>
-                </div>
-              )}
+              {(currentQuantity || artwork.quantity) <= 5 &&
+                (currentQuantity || artwork.quantity) > 0 && (
+                  <div className="low-stock-notice-bottom">
+                    <span className="low-stock-warning">
+                      ⚠️ Limited stock - Only{" "}
+                      {currentQuantity !== null
+                        ? currentQuantity
+                        : artwork.quantity}{" "}
+                      left!
+                    </span>
+                  </div>
+                )}
             </div>
           </div>
         </div>
@@ -669,21 +839,6 @@ const ArtworkDetail = () => {
           setCurrentQuantity(remainingQuantity);
           setShowPaymentModal(false);
         }}
-      />
-
-      <ThreeDModelModal
-        isOpen={showThreeDModal}
-        onClose={() => setShowThreeDModal(false)}
-        fileUrl={
-          primary3DFile
-            ? primary3DFile.url.startsWith("http")
-              ? primary3DFile.url
-              : `http://localhost:5000/${primary3DFile.url}`
-            : null
-        }
-        fileName={primary3DFile?.filename}
-        artworkTitle={artwork.title}
-        artworkArtist={artwork.artistName}
       />
     </div>
   );
