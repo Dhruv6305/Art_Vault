@@ -168,7 +168,8 @@ const getArtistInsights = async (req, res) => {
           name: "$artistInfo.name",
           sales: 1,
           revenue: { $round: ["$revenue", 0] },
-          rating: { $round: ["$avgRating", 1] }
+          rating: { $round: ["$avgRating", 1] },
+          currency: { $literal: "USD" } // Default currency for now
         }
       },
       {

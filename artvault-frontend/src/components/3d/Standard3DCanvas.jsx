@@ -33,6 +33,7 @@ const Standard3DCanvas = ({
     y: 0,
     z: 0,
   });
+  const lastPosUpdateRef = useRef(0);
 
   useEffect(() => {
     if (!fileUrl || !mountRef.current) return;
@@ -81,11 +82,11 @@ const Standard3DCanvas = ({
         renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-        // Force canvas to fill 100% of container
+        // Force canvas to fill container
         const canvas = renderer.domElement;
         canvas.style.display = "block";
-        canvas.style.width = "100% !important";
-        canvas.style.height = "100% !important";
+        canvas.style.width = "100%";
+        canvas.style.height = "100%";
         canvas.style.margin = "0";
         canvas.style.padding = "0";
 
@@ -147,13 +148,17 @@ const Standard3DCanvas = ({
           animationId = requestAnimationFrame(animate);
           controls.update();
 
-          // Update camera position display
-          if (camera) {
-            setCurrentCameraPos({
-              x: camera.position.x.toFixed(2),
-              y: camera.position.y.toFixed(2),
-              z: camera.position.z.toFixed(2),
-            });
+          // Update camera position display (throttled and only if panel is shown)
+          if (showCoordinatePanel && camera) {
+            const now = performance.now();
+            if (now - (lastPosUpdateRef.current || 0) > 200) {
+              lastPosUpdateRef.current = now;
+              setCurrentCameraPos({
+                x: camera.position.x.toFixed(2),
+                y: camera.position.y.toFixed(2),
+                z: camera.position.z.toFixed(2),
+              });
+            }
           }
 
           renderer.render(scene, camera);
@@ -298,7 +303,6 @@ const Standard3DCanvas = ({
           });
 
           // ENHANCED MATERIAL HANDLING - PRESERVE TEXTURES BUT ENSURE VISIBILITY
-          console.log("🎨 Analyzing and enhancing model materials...");
           let textureCount = 0;
           let materialCount = 0;
           let enhancedCount = 0;
@@ -322,10 +326,6 @@ const Standard3DCanvas = ({
 
                   // Strategy 1: Has textures - preserve and enhance
                   if (material.map || material.normalMap || material.bumpMap) {
-                    console.log(
-                      "✅ Preserving textured material:",
-                      material.name || "unnamed"
-                    );
 
                     // Ensure visibility without destroying textures
                     material.transparent = false;
@@ -342,7 +342,6 @@ const Standard3DCanvas = ({
                     ) {
                       // Very dark - lighten to show texture
                       material.color.setRGB(0.8, 0.8, 0.8);
-                      console.log("🔆 Lightened dark textured material");
                     }
 
                     material.needsUpdate = true;
@@ -353,10 +352,6 @@ const Standard3DCanvas = ({
                     material.color &&
                     material.color.getHex() !== 0x000000
                   ) {
-                    console.log(
-                      "🎨 Enhancing colored material:",
-                      material.name || "unnamed"
-                    );
 
                     material.side = THREE.DoubleSide;
                     material.transparent = false;
@@ -377,10 +372,6 @@ const Standard3DCanvas = ({
                   }
                   // Strategy 3: No texture, no color, or black - create visible material
                   else {
-                    console.log(
-                      "⚠️ Creating visible material for:",
-                      material.name || "unnamed"
-                    );
 
                     // Create a bright, visible color
                     material.color = new THREE.Color().setHSL(
@@ -397,7 +388,6 @@ const Standard3DCanvas = ({
                 });
               } else {
                 // No material at all - create one
-                console.log("🆕 Creating material for mesh without material");
                 child.material = new THREE.MeshLambertMaterial({
                   color: new THREE.Color().setHSL(Math.random(), 0.8, 0.6),
                   side: THREE.DoubleSide,
@@ -413,9 +403,7 @@ const Standard3DCanvas = ({
             }
           });
 
-          console.log(
-            `🎯 Material enhancement complete: ${materialCount} materials, ${textureCount} textures, ${preservedCount} preserved, ${enhancedCount} enhanced`
-          );
+          // Material enhancement summary (silenced in production)
 
           // Get original model dimensions BEFORE scaling
           const box = new THREE.Box3().setFromObject(model);
@@ -432,11 +420,7 @@ const Standard3DCanvas = ({
             const targetSize = 5;
             const scaleFactor = targetSize / maxDim;
             model.scale.setScalar(scaleFactor);
-            console.log(
-              `📏 Auto-scaled model: ${maxDim.toFixed(
-                2
-              )} → ${targetSize} (scale: ${scaleFactor.toFixed(3)})`
-            );
+            // Autoscaled to target size
           }
 
           // Center the model at origin

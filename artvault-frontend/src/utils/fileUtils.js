@@ -32,7 +32,9 @@ export const saveToLocalStorage = (key, data) => {
     localStorage.setItem(key, JSON.stringify(data));
     return true;
   } catch (error) {
-    console.error("Failed to save to localStorage:", error);
+    if (import.meta.env?.DEV) {
+      console.error("Failed to save to localStorage:", error);
+    }
     return false;
   }
 };
@@ -42,7 +44,9 @@ export const loadFromLocalStorage = (key) => {
     const data = localStorage.getItem(key);
     return data ? JSON.parse(data) : null;
   } catch (error) {
-    console.error("Failed to load from localStorage:", error);
+    if (import.meta.env?.DEV) {
+      console.error("Failed to load from localStorage:", error);
+    }
     return null;
   }
 };

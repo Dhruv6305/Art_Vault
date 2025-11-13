@@ -42,6 +42,11 @@ const OrderSchema = new mongoose.Schema(
       transactionId: { type: String, required: true },
       paymentMethod: { type: String, required: true },
       processedAt: { type: Date, required: true },
+      customerEmail: { type: String, required: false },
+      amount: { type: Number, required: false },
+      currency: { type: String, required: false },
+      last4: { type: String, required: false },
+      brand: { type: String, required: false },
     },
     pricing: {
       subtotal: { type: Number, required: true },

@@ -6,6 +6,17 @@ const PaymentSuccess = ({ artwork, orderData, onClose }) => {
   const [showOrderPopup, setShowOrderPopup] = useState(true);
   const printRef = useRef();
 
+  // Get currency from artwork
+  const currency = artwork.price?.currency || 'USD';
+  
+  // Format currency helper
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currency,
+    }).format(amount);
+  };
+
   // Handle keyboard events and body scroll
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -254,7 +265,7 @@ const PaymentSuccess = ({ artwork, orderData, onClose }) => {
               <div className="artwork-details">
                 <h4>{artwork.title}</h4>
                 <p>by {artwork.artistName}</p>
-                <p className="artwork-price">${orderData?.total?.toFixed(2)}</p>
+                <p className="artwork-price">{formatCurrency(orderData?.total)}</p>
               </div>
             </div>
           </div>
@@ -411,19 +422,19 @@ const PaymentSuccess = ({ artwork, orderData, onClose }) => {
           <div className="totals">
             <div className="total-line">
               <span>Subtotal:</span>
-              <span>${orderData?.subtotal?.toFixed(2)}</span>
+              <span>{formatCurrency(orderData?.subtotal)}</span>
             </div>
             <div className="total-line">
               <span>Tax:</span>
-              <span>${orderData?.tax?.toFixed(2)}</span>
+              <span>{formatCurrency(orderData?.tax)}</span>
             </div>
             <div className="total-line">
               <span>Shipping:</span>
-              <span>${orderData?.shipping?.toFixed(2)}</span>
+              <span>{formatCurrency(orderData?.shipping)}</span>
             </div>
             <div className="total-line final-total">
               <span><strong>Total Paid:</strong></span>
-              <span><strong>${orderData?.total?.toFixed(2)}</strong></span>
+              <span><strong>{formatCurrency(orderData?.total)}</strong></span>
             </div>
           </div>
         </div>

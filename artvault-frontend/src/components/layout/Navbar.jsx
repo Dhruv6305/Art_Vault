@@ -51,9 +51,6 @@ const Navbar = () => {
             <li>
               <Link to="/browse">Browse Art</Link>
             </li>
-            <li>
-              <Link to="/marketplace">Marketplace</Link>
-            </li>
             {isAuthenticated ? (
               <>
                 <li>
@@ -64,12 +61,6 @@ const Navbar = () => {
                 </li>
                 <li>
                   <Link to="/analytics">Analytics</Link>
-                </li>
-                <li>
-                  <Link to="/test-payment">Test Payment</Link>
-                </li>
-                <li>
-                  <Link to="/test-fbx">Test FBX</Link>
                 </li>
               </>
             ) : null}

@@ -26,7 +26,9 @@ class ScreenshotProtection {
     if (this.isActive) return;
     
     this.isActive = true;
-    console.log('🛡️ ArtVault Screenshot Protection Activated');
+    if (import.meta.env?.DEV) {
+      console.log('🛡️ ArtVault Screenshot Protection Activated');
+    }
     
     // Apply all protection methods
     this.blockScreenshotKeys();
@@ -169,10 +171,12 @@ class ScreenshotProtection {
       }
     });
 
-    setInterval(() => {
-      console.log(element);
-      console.clear();
-    }, 1000);
+    if (import.meta.env?.DEV) {
+      setInterval(() => {
+        console.log(element);
+        console.clear();
+      }, 1000);
+    }
   }
 
   // Add focus-based protection
@@ -395,7 +399,9 @@ class ScreenshotProtection {
     // Reset body styles
     document.body.style.filter = 'none';
     
-    console.log('🛡️ Screenshot Protection Disabled');
+    if (import.meta.env?.DEV) {
+      console.log('🛡️ Screenshot Protection Disabled');
+    }
   }
 
   // Re-enable protection

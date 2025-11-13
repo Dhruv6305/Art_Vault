@@ -3,7 +3,9 @@ export const handleApiError = (
   error,
   fallbackMessage = "Service temporarily unavailable"
 ) => {
-  console.error("API Error:", error);
+  if (import.meta.env?.DEV) {
+    console.error("API Error:", error);
+  }
 
   if (error.name === "TypeError" && error.message.includes("fetch")) {
     return "Network error - please check your connection";

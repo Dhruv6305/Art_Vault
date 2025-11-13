@@ -1,9 +1,13 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import PaymentModal from "../components/payment/PaymentModal.jsx";
 import Standard3DCanvas from "../components/3d/Standard3DCanvas.jsx";
 import api from "../api/axios.js";
+import {
+  savePostLoginIntent,
+  getAndClearPostLoginIntent,
+} from "../utils/postLoginIntent.js";
 
 // Enhanced Image component with better fallback and debugging
 const ImageWithFallback = ({ src, alt, className, fallbackText }) => {
@@ -61,6 +65,7 @@ const ImageWithFallback = ({ src, alt, className, fallbackText }) => {
 const ArtworkDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
 
   const [artwork, setArtwork] = useState(null);
@@ -75,9 +80,11 @@ const ArtworkDetail = () => {
     width: window.innerWidth,
     height: window.innerHeight,
   });
+  const [hasProcessedIntent, setHasProcessedIntent] = useState(false);
 
   useEffect(() => {
     fetchArtwork();
+    setHasProcessedIntent(false); // Reset intent processing flag when artwork changes
   }, [id]);
 
   useEffect(() => {
@@ -365,6 +372,91 @@ const ArtworkDetail = () => {
         );
     }
   };
+
+  const handleBuyNow = () => {
+    if (!user) {
+      const intent = {
+        action: "buy",
+        returnTo: location.pathname,
+      };
+
+      // Save to localStorage using utility function (survives OAuth redirects)
+      savePostLoginIntent(intent);
+
+      // Navigate with state for standard login compatibility
+      navigate("/login", { state: { from: location.pathname, action: "buy" } });
+      return;
+    }
+    setShowPaymentModal(true);
+  };
+
+  // Consolidated post-login handler: checks both location.state and localStorage
+  useEffect(() => {
+    console.log("ArtworkDetail: useEffect triggered", {
+      user: !!user,
+      artwork: !!artwork,
+      hasProcessedIntent,
+      triggerBuyNow: location.state?.triggerBuyNow,
+      pathname: location.pathname
+    });
+
+    if (!user || !artwork || hasProcessedIntent) return;
+
+    // Check location.state first (standard login flow)
+    if (location.state?.triggerBuyNow) {
+      console.log("ArtworkDetail: triggerBuyNow detected in location.state");
+      
+      // Validate artwork availability before opening modal
+      if (!artwork) {
+        console.log("ArtworkDetail: Artwork not found, redirecting to browse");
+        setError("Artwork not found. It may have been removed.");
+        navigate("/browse", { replace: true });
+        return;
+      }
+
+      const availableQuantity = currentQuantity !== null ? currentQuantity : artwork.quantity;
+      if (availableQuantity === 0) {
+        console.log("ArtworkDetail: Artwork sold out");
+        setError("This artwork is no longer available for purchase.");
+        setHasProcessedIntent(true);
+        return;
+      }
+
+      // Open modal and mark intent as processed
+      console.log("ArtworkDetail: Opening payment modal");
+      setShowPaymentModal(true);
+      setHasProcessedIntent(true);
+      return;
+    }
+
+    // Fall back to localStorage (OAuth flow or page refresh)
+    const intent = getAndClearPostLoginIntent();
+    console.log("ArtworkDetail: Checking localStorage intent", intent);
+    
+    if (intent?.action === "buy" && intent?.returnTo === location.pathname) {
+      console.log("ArtworkDetail: localStorage intent matched");
+      
+      // Validate artwork availability before opening modal
+      if (!artwork) {
+        console.log("ArtworkDetail: Artwork not found, redirecting to browse");
+        setError("Artwork not found. It may have been removed.");
+        navigate("/browse", { replace: true });
+        return;
+      }
+
+      const availableQuantity = currentQuantity !== null ? currentQuantity : artwork.quantity;
+      if (availableQuantity === 0) {
+        console.log("ArtworkDetail: Artwork sold out");
+        setError("This artwork is no longer available for purchase.");
+        setHasProcessedIntent(true);
+        return;
+      }
+
+      console.log("ArtworkDetail: Opening payment modal from localStorage intent");
+      setShowPaymentModal(true);
+      setHasProcessedIntent(true);
+    }
+  }, [user, artwork, location.pathname, location.state, currentQuantity, navigate, hasProcessedIntent]);
 
   if (loading) {
     return (
@@ -762,9 +854,9 @@ const ArtworkDetail = () => {
                 </button>
                 <button
                   className="view-stats-btn"
-                  onClick={() => navigate(`/artwork-stats/${artwork._id}`)}
+                  onClick={() => navigate('/analytics')}
                 >
-                  📊 View Statistics
+                  📊 View Analytics
                 </button>
               </div>
             ) : (
@@ -772,7 +864,7 @@ const ArtworkDetail = () => {
                 <button className="contact-btn">📧 Contact Artist</button>
                 <button
                   className="buy-now-btn"
-                  onClick={() => setShowPaymentModal(true)}
+                  onClick={handleBuyNow}
                   disabled={
                     (currentQuantity !== null
                       ? currentQuantity

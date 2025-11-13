@@ -1,10 +1,12 @@
 import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import api from "../api/axios.js";
+import { getAndClearPostLoginIntent } from "../utils/postLoginIntent.js";
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { loadUser } = useAuth();
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({});
@@ -69,7 +71,35 @@ const Login = () => {
       const res = await api.post("/auth/login", { email, password });
       localStorage.setItem("token", res.data.token);
       await loadUser();
-      navigate("/dashboard");
+
+      // Get intent from both location.state (standard login) and localStorage (OAuth fallback)
+      const stateIntent = location.state;
+      const storageIntent = getAndClearPostLoginIntent();
+      
+      console.log("Login: stateIntent =", stateIntent);
+      console.log("Login: storageIntent =", storageIntent);
+      
+      // Merge intents, prioritizing location.state for standard login flow
+      const intent = stateIntent || storageIntent;
+      
+      console.log("Login: merged intent =", intent);
+      
+      // Determine navigation destination
+      const from = intent?.from || intent?.returnTo;
+      const action = intent?.action;
+
+      console.log("Login: from =", from, "action =", action);
+
+      if (from && action === "buy") {
+        console.log("Login: Navigating to", from, "with triggerBuyNow");
+        navigate(from, { state: { triggerBuyNow: true }, replace: true });
+      } else if (from) {
+        console.log("Login: Navigating to", from);
+        navigate(from, { replace: true });
+      } else {
+        console.log("Login: No intent, navigating to dashboard");
+        navigate("/dashboard");
+      }
     } catch (err) {
       const errorMsg =
         err.response?.data?.msg || "An error occurred during login.";

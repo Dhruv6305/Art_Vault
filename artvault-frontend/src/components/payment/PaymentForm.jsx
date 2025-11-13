@@ -26,6 +26,17 @@ const PaymentForm = ({
   const [processing, setProcessing] = useState(false);
   const [errors, setErrors] = useState({});
 
+  // Get currency from artwork
+  const currency = artwork.price?.currency || 'USD';
+  
+  // Format currency helper
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currency,
+    }).format(amount);
+  };
+
   // Handle keyboard events and body scroll
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -144,8 +155,7 @@ const PaymentForm = ({
   const simulatePayment = () => {
     return new Promise((resolve) => {
       setTimeout(() => {
-        // Simulate payment processing - Always succeed for testing
-        const success = true; // Changed from Math.random() > 0.1 to always succeed
+        const success = true;
         resolve({
           success,
           transactionId: success
@@ -351,7 +361,7 @@ const PaymentForm = ({
           <div className="mini-artwork-info">
             <span className="item-name">{artwork.title}</span>
             <span className="item-artist">by {artwork.artistName}</span>
-            <span className="item-price">${orderData?.total?.toFixed(2)}</span>
+            <span className="item-price">{formatCurrency(orderData?.total)}</span>
           </div>
         </div>
       </div>
@@ -560,7 +570,7 @@ const PaymentForm = ({
           <button type="submit" className="pay-btn" disabled={processing}>
             {processing
               ? "Processing..."
-              : `Pay $${orderData?.total?.toFixed(2)}`}
+              : `Pay ${formatCurrency(orderData?.total)}`}
           </button>
         </div>
           </form>

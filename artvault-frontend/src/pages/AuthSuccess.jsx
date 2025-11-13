@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
+import { getAndClearPostLoginIntent } from "../utils/postLoginIntent.js";
 
 const AuthSuccess = () => {
   const location = useLocation();
@@ -8,9 +9,16 @@ const AuthSuccess = () => {
   const { loadUser } = useAuth();
   const [status, setStatus] = useState("Processing authentication...");
   const [error, setError] = useState(null);
+  const hasProcessedRef = useRef(false);
 
   useEffect(() => {
+    if (hasProcessedRef.current) {
+      console.log("AuthSuccess: Already processed, skipping");
+      return;
+    }
+
     const handleAuth = async () => {
+      hasProcessedRef.current = true;
       try {
         console.log("AuthSuccess: Processing OAuth callback");
         const params = new URLSearchParams(location.search);
@@ -25,14 +33,23 @@ const AuthSuccess = () => {
 
           setStatus("Loading user data...");
           await loadUser();
-          console.log(
-            "AuthSuccess: User data loaded, redirecting to dashboard"
-          );
 
-          setStatus("Redirecting to dashboard...");
+          // Get and clear post-login intent using utility function
+          const intent = getAndClearPostLoginIntent();
+
+          setStatus("Redirecting...");
           setTimeout(() => {
-            navigate("/dashboard");
-          }, 1000);
+            // Handle buy action with triggerBuyNow flag
+            if (intent?.returnTo && intent?.action === "buy") {
+              navigate(intent.returnTo, { state: { triggerBuyNow: true }, replace: true });
+            } else if (intent?.returnTo) {
+              // Handle other actions or simple return navigation
+              navigate(intent.returnTo, { replace: true });
+            } else {
+              // No intent found, redirect to default dashboard
+              navigate("/dashboard");
+            }
+          }, 500);
         } else {
           console.error("AuthSuccess: No token found in URL");
           setError("No authentication token received");

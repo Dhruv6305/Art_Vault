@@ -40,7 +40,7 @@ const Dashboard = () => {
 
   // Handlers for Quick Actions
   const handleUploadArtwork = () => navigate("/add-artwork");
-  const handleBrowseMarketplace = () => navigate("/marketplace");
+  const handleBrowseArtworks = () => navigate("/browse");
   const handleViewCollections = () => navigate("/my-artworks");
 
   // Counts
@@ -236,7 +236,7 @@ const Dashboard = () => {
         <h3 style={{ color: 'var(--text-accent)', marginBottom: '1rem' }}>Quick Actions</h3>
         <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
           <button className="btn btn-primary" onClick={handleUploadArtwork}>🎨 Upload Artwork</button>
-          <button className="btn btn-primary" onClick={handleBrowseMarketplace}>🛒 Browse Marketplace</button>
+          <button className="btn btn-primary" onClick={handleBrowseArtworks}>🛒 Browse Artworks</button>
           <button className="btn btn-primary" onClick={handleViewCollections}>📁 View Collections</button>
         </div>
       </div>
@@ -260,7 +260,7 @@ const Dashboard = () => {
             <>
               <p style={{ fontSize: '3rem', margin: '0 0 1rem 0' }}>📊</p>
               <p>No recent activity to display.</p>
-              <p style={{ fontSize: '0.875rem' }}>Start by uploading your first artwork or browsing the marketplace!</p>
+              <p style={{ fontSize: '0.875rem' }}>Start by uploading your first artwork or browsing artworks!</p>
             </>
           ) : (
             <ul style={{ listStyle: 'none', padding: 0 }}>

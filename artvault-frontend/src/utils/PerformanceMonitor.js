@@ -1,7 +1,7 @@
 // Simple performance monitoring utility
 class PerformanceMonitor {
   static measureRender(componentName, renderFunction) {
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env?.DEV) {
       const startTime = performance.now();
       const result = renderFunction();
       const endTime = performance.now();
@@ -17,7 +17,7 @@ class PerformanceMonitor {
   }
 
   static logMemoryUsage() {
-    if (process.env.NODE_ENV === 'development' && performance.memory) {
+    if (import.meta.env?.DEV && performance.memory) {
       const memory = performance.memory;
       console.log('Memory Usage:', {
         used: `${Math.round(memory.usedJSHeapSize / 1024 / 1024)} MB`,
@@ -28,7 +28,7 @@ class PerformanceMonitor {
   }
 
   static measureAsyncOperation(operationName, asyncFunction) {
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env?.DEV) {
       const startTime = performance.now();
       return asyncFunction().finally(() => {
         const endTime = performance.now();

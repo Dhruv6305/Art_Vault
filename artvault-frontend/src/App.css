@@ -1,6 +1,9 @@
 /* Import 3D component styles */
 @import './components/3d/ThreeD.css';
 
+/* Import Payment Modal styles */
+@import './styles/PaymentModal.css';
+
 :root {
   /* Dark Mode Color Palette */
   --primary-color: #3b82f6;

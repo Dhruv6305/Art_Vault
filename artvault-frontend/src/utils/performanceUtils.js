@@ -51,7 +51,7 @@ export const preloadImage = (src) => {
 
 // Memory usage checker (development only)
 export const checkMemoryUsage = () => {
-  if (process.env.NODE_ENV === 'development' && performance.memory) {
+  if (import.meta.env?.DEV && performance.memory) {
     const memory = performance.memory;
     const used = Math.round(memory.usedJSHeapSize / 1024 / 1024);
     const total = Math.round(memory.totalJSHeapSize / 1024 / 1024);
@@ -111,7 +111,7 @@ export const measurePerformance = (name, fn) => {
       const end = performance.now();
       const duration = end - start;
       
-      if (process.env.NODE_ENV === 'development') {
+      if (import.meta.env?.DEV) {
         console.log(`⏱️ ${name}: ${duration.toFixed(2)}ms`);
         
         if (duration > 100) {

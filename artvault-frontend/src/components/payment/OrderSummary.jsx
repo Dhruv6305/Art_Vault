@@ -22,11 +22,24 @@ const OrderSummary = ({
   const [orderQuantity, setOrderQuantity] = useState(quantity);
   const [shippingMethod, setShippingMethod] = useState("standard");
 
-  const shippingCosts = {
-    standard: 15.99,
-    express: 29.99,
-    overnight: 49.99,
+  // Get currency from artwork
+  const currency = artwork.price?.currency || 'USD';
+  
+  // Shipping costs based on currency
+  const getShippingCosts = (curr) => {
+    const rates = {
+      'USD': { standard: 15.99, express: 29.99, overnight: 49.99 },
+      'EUR': { standard: 14.99, express: 27.99, overnight: 45.99 },
+      'GBP': { standard: 12.99, express: 24.99, overnight: 39.99 },
+      'INR': { standard: 1299, express: 2499, overnight: 3999 },
+      'JPY': { standard: 1999, express: 3999, overnight: 6499 },
+      'AUD': { standard: 22.99, express: 42.99, overnight: 69.99 },
+      'CAD': { standard: 19.99, express: 37.99, overnight: 61.99 },
+    };
+    return rates[curr] || rates['USD'];
   };
+
+  const shippingCosts = getShippingCosts(currency);
 
   const tax = totalAmount * orderQuantity * 0.08; // 8% tax
   const shipping = shippingCosts[shippingMethod];
@@ -381,7 +394,12 @@ const OrderSummary = ({
                     <div className="shipping-header">
                       <span className="shipping-icon">📦</span>
                       <span className="shipping-name">Standard Shipping</span>
-                      <span className="shipping-cost">${shippingCosts.standard}</span>
+                      <span className="shipping-cost">
+                        {new Intl.NumberFormat('en-US', {
+                          style: 'currency',
+                          currency: currency,
+                        }).format(shippingCosts.standard)}
+                      </span>
                     </div>
                     <span className="shipping-time">5-7 business days</span>
                     <span className="shipping-desc">Most economical option</span>
@@ -401,7 +419,12 @@ const OrderSummary = ({
                     <div className="shipping-header">
                       <span className="shipping-icon">⚡</span>
                       <span className="shipping-name">Express Shipping</span>
-                      <span className="shipping-cost">${shippingCosts.express}</span>
+                      <span className="shipping-cost">
+                        {new Intl.NumberFormat('en-US', {
+                          style: 'currency',
+                          currency: currency,
+                        }).format(shippingCosts.express)}
+                      </span>
                     </div>
                     <span className="shipping-time">2-3 business days</span>
                     <span className="shipping-desc">Faster delivery</span>
@@ -421,7 +444,12 @@ const OrderSummary = ({
                     <div className="shipping-header">
                       <span className="shipping-icon">🚀</span>
                       <span className="shipping-name">Overnight Shipping</span>
-                      <span className="shipping-cost">${shippingCosts.overnight}</span>
+                      <span className="shipping-cost">
+                        {new Intl.NumberFormat('en-US', {
+                          style: 'currency',
+                          currency: currency,
+                        }).format(shippingCosts.overnight)}
+                      </span>
                     </div>
                     <span className="shipping-time">Next business day</span>
                     <span className="shipping-desc">Fastest delivery</span>
@@ -444,28 +472,48 @@ const OrderSummary = ({
                     <span className="total-icon">🛒</span>
                     Subtotal ({orderQuantity} item{orderQuantity > 1 ? "s" : ""})
                   </span>
-                  <span className="total-value">${(totalAmount * orderQuantity).toFixed(2)}</span>
+                  <span className="total-value">
+                    {new Intl.NumberFormat('en-US', {
+                      style: 'currency',
+                      currency: currency,
+                    }).format(totalAmount * orderQuantity)}
+                  </span>
                 </div>
                 <div className="total-line">
                   <span className="total-label">
                     <span className="total-icon">🧾</span>
                     Tax (8%)
                   </span>
-                  <span className="total-value">${tax.toFixed(2)}</span>
+                  <span className="total-value">
+                    {new Intl.NumberFormat('en-US', {
+                      style: 'currency',
+                      currency: currency,
+                    }).format(tax)}
+                  </span>
                 </div>
                 <div className="total-line">
                   <span className="total-label">
                     <span className="total-icon">🚚</span>
                     Shipping
                   </span>
-                  <span className="total-value">${shipping.toFixed(2)}</span>
+                  <span className="total-value">
+                    {new Intl.NumberFormat('en-US', {
+                      style: 'currency',
+                      currency: currency,
+                    }).format(shipping)}
+                  </span>
                 </div>
                 <div className="total-line final-total">
                   <span className="total-label">
                     <span className="total-icon">💎</span>
                     Total Amount
                   </span>
-                  <span className="total-value">${finalTotal.toFixed(2)}</span>
+                  <span className="total-value">
+                    {new Intl.NumberFormat('en-US', {
+                      style: 'currency',
+                      currency: currency,
+                    }).format(finalTotal)}
+                  </span>
                 </div>
               </div>
             </div>

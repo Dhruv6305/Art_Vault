@@ -43,23 +43,18 @@ const ArtworkCard = React.memo(({ artwork, showActions = true }) => {
     [user, artwork._id]
   );
 
-  // Memoize price formatter for better performance
-  const priceFormatter = useMemo(
-    () =>
-      new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 2,
-      }),
-    []
-  );
-
+  // Format price with the artwork's currency
   const formatPrice = useCallback(
     (price) => {
-      return priceFormatter.format(price.amount);
+      const currency = price?.currency || 'USD';
+      return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: currency,
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2,
+      }).format(price.amount);
     },
-    [priceFormatter]
+    []
   );
 
   const getFilePreview = (file) => {

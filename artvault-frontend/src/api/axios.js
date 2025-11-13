@@ -10,7 +10,9 @@ axiosInstance.interceptors.request.use(
     if (token) {
       config.headers['x-auth-token'] = token;
     }
-    console.log('🚀 Making request:', config.method?.toUpperCase(), config.url);
+    if (import.meta.env?.DEV) {
+      console.log('🚀 Making request:', config.method?.toUpperCase(), config.url);
+    }
     return config;
   },
   (error) => Promise.reject(error)
@@ -19,13 +21,17 @@ axiosInstance.interceptors.request.use(
 // Add response interceptor for debugging
 axiosInstance.interceptors.response.use(
   (response) => {
-    console.log('✅ Response received:', response.status, response.config.url);
-    console.log('📋 Response data:', response.data);
+    if (import.meta.env?.DEV) {
+      console.log('✅ Response received:', response.status, response.config.url);
+      console.log('📋 Response data:', response.data);
+    }
     return response;
   },
   (error) => {
-    console.error('❌ Response error:', error.response?.status, error.config?.url);
-    console.error('📋 Error data:', error.response?.data);
+    if (import.meta.env?.DEV) {
+      console.error('❌ Response error:', error.response?.status, error.config?.url);
+      console.error('📋 Error data:', error.response?.data);
+    }
     return Promise.reject(error);
   }
 );

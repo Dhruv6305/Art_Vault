@@ -458,63 +458,91 @@ const AddArtwork = () => {
               </div>
 
               {/* Price Suggestions */}
-              {formData.category && (
-                <div className="super-form-group">
-                  <label className="super-label">
-                    <span className="label-text">💡 Pricing Suggestions</span>
-                  </label>
-                  <div className="price-suggestions">
-                    <button
-                      type="button"
-                      className="suggestion-btn"
-                      onClick={() =>
-                        handleInputChange({
-                          target: { name: "price.amount", value: "50", type: "number" },
-                        })
-                      }
-                    >
-                      ₹50 - Starter
-                    </button>
-                    <button
-                      type="button"
-                      className="suggestion-btn"
-                      onClick={() =>
-                        handleInputChange({
-                          target: { name: "price.amount", value: "150", type: "number" },
-                        })
-                      }
-                    >
-                      ₹150 - Popular
-                    </button>
-                    <button
-                      type="button"
-                      className="suggestion-btn"
-                      onClick={() =>
-                        handleInputChange({
-                          target: { name: "price.amount", value: "300", type: "number" },
-                        })
-                      }
-                    >
-                      ₹300 - Premium
-                    </button>
-                    <button
-                      type="button"
-                      className="suggestion-btn"
-                      onClick={() =>
-                        handleInputChange({
-                          target: { name: "price.amount", value: "500", type: "number" },
-                        })
-                      }
-                    >
-                      ₹500+ - Luxury
-                    </button>
+              {formData.category && (() => {
+                // Get currency-specific price suggestions
+                const getPriceSuggestions = (currency) => {
+                  const suggestions = {
+                    'INR': [
+                      { value: 500, label: 'Starter' },
+                      { value: 1500, label: 'Popular' },
+                      { value: 3000, label: 'Premium' },
+                      { value: 5000, label: 'Luxury' }
+                    ],
+                    'USD': [
+                      { value: 10, label: 'Starter' },
+                      { value: 50, label: 'Popular' },
+                      { value: 150, label: 'Premium' },
+                      { value: 300, label: 'Luxury' }
+                    ],
+                    'EUR': [
+                      { value: 10, label: 'Starter' },
+                      { value: 45, label: 'Popular' },
+                      { value: 140, label: 'Premium' },
+                      { value: 280, label: 'Luxury' }
+                    ],
+                    'GBP': [
+                      { value: 8, label: 'Starter' },
+                      { value: 40, label: 'Popular' },
+                      { value: 120, label: 'Premium' },
+                      { value: 250, label: 'Luxury' }
+                    ],
+                    'CAD': [
+                      { value: 12, label: 'Starter' },
+                      { value: 60, label: 'Popular' },
+                      { value: 180, label: 'Premium' },
+                      { value: 350, label: 'Luxury' }
+                    ],
+                    'AUD': [
+                      { value: 15, label: 'Starter' },
+                      { value: 70, label: 'Popular' },
+                      { value: 200, label: 'Premium' },
+                      { value: 400, label: 'Luxury' }
+                    ]
+                  };
+                  return suggestions[currency] || suggestions['USD'];
+                };
+
+                const suggestions = getPriceSuggestions(formData.price.currency);
+                const currencySymbol = new Intl.NumberFormat('en-US', {
+                  style: 'currency',
+                  currency: formData.price.currency,
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0
+                }).format(0).replace('0', '').trim();
+
+                return (
+                  <div className="super-form-group">
+                    <label className="super-label">
+                      <span className="label-text">💡 Pricing Suggestions</span>
+                    </label>
+                    <div className="price-suggestions">
+                      {suggestions.map((suggestion, index) => (
+                        <button
+                          key={index}
+                          type="button"
+                          className="suggestion-btn"
+                          onClick={() =>
+                            handleInputChange({
+                              target: { name: "price.amount", value: suggestion.value.toString(), type: "number" },
+                            })
+                          }
+                        >
+                          {new Intl.NumberFormat('en-US', {
+                            style: 'currency',
+                            currency: formData.price.currency,
+                            minimumFractionDigits: 0,
+                            maximumFractionDigits: 0
+                          }).format(suggestion.value)}{index === suggestions.length - 1 ? '+' : ''} - {suggestion.label}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="help-text">
+                      <span className="help-icon">💡</span>
+                      These are general suggestions. Price based on your artwork's uniqueness and market demand.
+                    </div>
                   </div>
-                  <div className="help-text">
-                    <span className="help-icon">💡</span>
-                    These are general suggestions. Price based on your artwork's uniqueness and market demand.
-                  </div>
-                </div>
-              )}
+                );
+              })()}
             </div>
           </>
         )}
